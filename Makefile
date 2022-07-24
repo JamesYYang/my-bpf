@@ -1,9 +1,12 @@
-all: build-ebpf build run
+all: build-ebpf build-assets build run
 
 build-ebpf:
 	mkdir -p ebpf/bin
-	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ebpf/bin/probe.o ebpf/kp.c
-	go run github.com/shuLhan/go-bindata/cmd/go-bindata -pkg main -prefix "ebpf/bin" -o "probe.go" "ebpf/bin/probe.o"
+	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ebpf/bin/kp.o ebpf/kp.c
+	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ebpf/bin/tp.o ebpf/tp.c
+
+build-assets:
+	go run github.com/shuLhan/go-bindata/cmd/go-bindata -pkg assets -o "assets/probe.go" $(wildcard ebpf/bin/*.o)
 
 build:
 	go build -o mbpf
@@ -12,4 +15,4 @@ run:
 	./mbpf
 
 clean:
-	rm -f ebpf/bin/probe.o mbpf
+	rm -f ebpf/bin/*.o mbpf
