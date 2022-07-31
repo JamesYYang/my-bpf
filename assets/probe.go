@@ -101,7 +101,7 @@ func bindataEbpfBinKpO() (*asset, error) {
 		size: 7408,
 		md5checksum: "",
 		mode: os.FileMode(511),
-		modTime: time.Unix(1658628844, 0),
+		modTime: time.Unix(1659255087, 0),
 	}
 
 	a := &asset{bytes: bytes, info: info}
@@ -131,7 +131,7 @@ func bindataEbpfBinTpO() (*asset, error) {
 		size: 6944,
 		md5checksum: "",
 		mode: os.FileMode(511),
-		modTime: time.Unix(1658628845, 0),
+		modTime: time.Unix(1659255088, 0),
 	}
 
 	a := &asset{bytes: bytes, info: info}
