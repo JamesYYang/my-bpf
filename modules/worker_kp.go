@@ -112,6 +112,6 @@ func (w *KPWoker) Decode(em *ebpf.Map, b []byte) (result string, err error) {
 
 func init() {
 	w := &KPWoker{}
-	w.name = "EBPFKProbe"
+	// w.name = "EBPFKProbe"
 	Register(w)
 }

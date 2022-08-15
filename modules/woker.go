@@ -32,6 +32,9 @@ var workers = make(map[string]IWoker)
 
 func Register(w IWoker) {
 	name := w.Name()
+	if name == "" {
+		return
+	}
 	if _, ok := workers[name]; !ok {
 		workers[name] = w
 	}

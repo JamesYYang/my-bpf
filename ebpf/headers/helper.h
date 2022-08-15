@@ -13,3 +13,6 @@
     bpf_probe_read_user((void *)&_val, sizeof(_val), &ptr); \
     _val;                                                   \
   })
+
+#define AF_INET 2
+#define AF_INET6 10  
