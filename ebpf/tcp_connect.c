@@ -12,9 +12,8 @@ struct sock_data
   u16 sport;
   u16 dport;
   u16 family;
-  int oldstate;
-  int newstate;
-  u16 protocol;
+  u16 oldstate;
+  u16 newstate;
 };
 
 /* BPF ringbuf map */
@@ -35,8 +34,7 @@ SEC("tracepoint/sock/inet_sock_set_state")
 int tracepoint_inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *ctx)
 {
   u16 family = ctx->family;
-
-  if (family == AF_INET)// && ctx->newstate == TCP_SYN_SENT)
+  if (family == AF_INET)
   {
     struct sock_data *data;
     data = bpf_ringbuf_reserve(&tcp_connect_events, sizeof(*data), 0);
@@ -44,16 +42,13 @@ int tracepoint_inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *c
     {
       return 0;
     }
-
+    data->family = family;
+    data->newstate = ctx->newstate;
+    data->oldstate = ctx->oldstate;
     bpf_probe_read(data->saddr, 4, ctx->saddr);
     bpf_probe_read(data->daddr, 4, ctx->daddr);
     data->sport = ctx->sport;
     data->dport = ctx->dport;
-    data->family = family;
-    data->newstate = ctx->newstate;
-    data->oldstate = ctx->oldstate;
-    data->protocol = ctx->protocol;
-
     bpf_ringbuf_submit(data, 0);
   }
 

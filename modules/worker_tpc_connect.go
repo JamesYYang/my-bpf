@@ -23,10 +23,25 @@ type TCP_Connect_Event struct {
 	Sport    uint16
 	Dport    uint16
 	Family   uint16
-	Oldstate int16
-	Newstate int16
-	Protocol uint16
+	Oldstate uint16
+	Newstate uint16
 }
+
+const (
+	TCP_ESTABLISHED  = 1
+	TCP_SYN_SENT     = 2
+	TCP_SYN_RECV     = 3
+	TCP_FIN_WAIT1    = 4
+	TCP_FIN_WAIT2    = 5
+	TCP_TIME_WAIT    = 6
+	TCP_CLOSE        = 7
+	TCP_CLOSE_WAIT   = 8
+	TCP_LAST_ACK     = 9
+	TCP_LISTEN       = 10
+	TCP_CLOSING      = 11
+	TCP_NEW_SYN_RECV = 12
+	TCP_MAX_STATES   = 13
+)
 
 func (w *TCP_Connect_Woker) Name() string {
 	return w.name
@@ -112,11 +127,18 @@ func (w *TCP_Connect_Woker) Decode(em *ebpf.Map, b []byte) (result string, err e
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("Source: [%s:%d] Dst: [%s:%d] states: [%d -> %d] -- Family: %d \n",
-		inet_btoa(event.Saddr[:4]), event.Sport,
-		inet_btoa(event.Daddr[:4]), event.Dport,
-		event.Oldstate, event.Newstate,
-		event.Family), nil
+	if event.Oldstate == TCP_SYN_RECV && event.Newstate == TCP_ESTABLISHED {
+		return fmt.Sprintf("TCP Accept Event: [%s:%d] -> [%s:%d] \n",
+			inet_btoa(event.Daddr[:4]), event.Dport,
+			inet_btoa(event.Saddr[:4]), event.Sport), nil
+	} else if event.Oldstate == TCP_CLOSE && event.Newstate == TCP_SYN_SENT {
+		return fmt.Sprintf("TCP Connect Event: [%s:%d] -> [%s:%d] \n",
+			inet_btoa(event.Saddr[:4]), event.Sport,
+			inet_btoa(event.Daddr[:4]), event.Dport), nil
+	} else {
+		return "", nil
+	}
+
 }
 
 func init() {

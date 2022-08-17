@@ -69,7 +69,9 @@ func (w *Woker) Run() error {
 }
 
 func (w *Woker) Write(msg string) {
-	log.Println(msg)
+	if msg != "" {
+		log.Println(msg)
+	}
 }
 
 func (w *Woker) Decode(em *ebpf.Map, b []byte) (result string, err error) {
