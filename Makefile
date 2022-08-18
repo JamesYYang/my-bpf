@@ -5,6 +5,7 @@ build-ebpf:
 	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ebpf/bin/kp.o ebpf/kp.c
 	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ebpf/bin/tp.o ebpf/tp.c
 	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ebpf/bin/tcp_connect.o ebpf/tcp_connect.c
+	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ebpf/bin/tcp_reset.o ebpf/tcp_reset.c
 
 build-assets:
 	go run github.com/shuLhan/go-bindata/cmd/go-bindata -pkg assets -o "assets/probe.go" $(wildcard ebpf/bin/*.o)

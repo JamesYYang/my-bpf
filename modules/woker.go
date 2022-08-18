@@ -55,12 +55,12 @@ func (w *Woker) Init() {
 
 func (w *Woker) Run() error {
 	//  start
-	log.Printf("begin start core")
+	log.Printf("[%s]begin start core", w.name)
 	err := w.core.Start()
 	if err != nil {
 		return err
 	}
-	log.Printf("begin start event")
+	log.Printf("[%s]begin start event", w.name)
 	err = w.readEvents()
 	if err != nil {
 		return err
@@ -81,7 +81,7 @@ func (w *Woker) Decode(em *ebpf.Map, b []byte) (result string, err error) {
 func (w *Woker) readEvents() error {
 	var errChan = make(chan error, 8)
 	event := w.eventMap
-	log.Println("begin read events")
+	log.Printf("[%s]begin read events", w.name)
 	log.Println(event.String())
 	switch {
 	case event.Type() == ebpf.RingBuf:
@@ -133,7 +133,7 @@ func (w *Woker) perfEventReader(errChan chan error, em *ebpf.Map) {
 }
 
 func (w *Woker) ringbufEventReader(errChan chan error, em *ebpf.Map) {
-	log.Println("begin to read from ringbuf")
+	log.Printf("[%s]begin to read from ringbuf", w.name)
 	rd, err := ringbuf.NewReader(em)
 	if err != nil {
 		errChan <- fmt.Errorf("creating %s reader dns: %s", em.String(), err)
