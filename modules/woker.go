@@ -32,10 +32,11 @@ var workers = make(map[string]IWoker)
 
 func Register(w IWoker) {
 	name := w.Name()
-	if name == "" {
+	if MyBpfEnv.StartProbe != "" && name != MyBpfEnv.StartProbe {
 		return
 	}
 	if _, ok := workers[name]; !ok {
+		log.Printf("Register worker: %s", name)
 		workers[name] = w
 	}
 }
