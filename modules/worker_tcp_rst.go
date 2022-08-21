@@ -17,13 +17,6 @@ type TCP_RST_Woker struct {
 	Woker
 }
 
-type TCP_Exception_Event struct {
-	Sip   uint32
-	Dip   uint32
-	Sport uint16
-	Dport uint16
-}
-
 func (w *TCP_RST_Woker) Name() string {
 	return w.name
 }
@@ -103,16 +96,22 @@ func (w *TCP_RST_Woker) Start() error {
 	return nil
 }
 
-func (w *TCP_RST_Woker) Decode(em *ebpf.Map, b []byte) (result string, err error) {
+func (w *TCP_RST_Woker) Decode(em *ebpf.Map, b []byte) (*BPFMessage, error) {
 	// Parse the ringbuf event entry into a bpfEvent structure.
 	var event TCP_Exception_Event
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
-		return "", err
+		return nil, err
 	}
-	return fmt.Sprintf("TCP Reset Event: [%s:%d] -> [%s:%d] \n",
-		inet_ntoa(event.Dip), event.Dport,
-		inet_ntoa(event.Sip), event.Sport), nil
 
+	msg := NewMessage()
+	msg.FillEventBase(event.Probe_Event_Base)
+	msg.Event = NET_Rest
+	msg.NET_SourceIP = inet_ntoa(event.Dip)
+	msg.NET_SourcePort = int(event.Dport)
+	msg.NET_DestIP = inet_ntoa(event.Sip)
+	msg.NET_DestPort = int(event.Sport)
+	msg.UtsName = unix.ByteSliceToString(event.UtsName[:])
+	return msg, nil
 }
 
 func init() {

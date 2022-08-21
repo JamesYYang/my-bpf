@@ -5,14 +5,6 @@
 #include "helper.h"
 #include "bpf_endian.h"
 
-struct ex_sock_data
-{
-  u32 sip;   //源IP
-  u32 dip;   //目的IP
-  u16 sport; //源端口
-  u16 dport; //目的端口
-};
-
 /* BPF ringbuf map */
 struct
 {
@@ -22,23 +14,41 @@ struct
 
 static inline unsigned char *skb_transport_header(const struct sk_buff *skb)
 {
-	return READ_KERN(skb->head) + READ_KERN(skb->transport_header);
+  return READ_KERN(skb->head) + READ_KERN(skb->transport_header);
 }
 
 static inline unsigned char *skb_network_header(const struct sk_buff *skb)
 {
-	return READ_KERN(skb->head) + READ_KERN(skb->network_header);
+  return READ_KERN(skb->head) + READ_KERN(skb->network_header);
+}
+
+static __always_inline char *get_task_uts_name(struct task_struct *task)
+{
+	struct nsproxy *np = READ_KERN(task->nsproxy);
+	struct uts_namespace *uts_ns = READ_KERN(np->uts_ns);
+	return READ_KERN(uts_ns->name.nodename);
 }
 
 SEC("kprobe/tcp_v4_send_reset")
 int kp_tcp_v4_send_reset(struct pt_regs *ctx)
 {
-  struct ex_sock_data *data;
+  struct exception_sock_data *data;
   data = bpf_ringbuf_reserve(&tcp_reset_events, sizeof(*data), 0);
   if (!data)
   {
     return 0;
   }
+
+  struct task_struct *task = (struct task_struct *)bpf_get_current_task();
+
+  data->pid = READ_KERN(task->pid);
+  data->tgid = READ_KERN(task->tgid);
+  data->ppid = READ_KERN(READ_KERN(task->real_parent)->pid);
+  bpf_get_current_comm(data->comm, sizeof(data->comm));
+
+  char *uts_name = get_task_uts_name(task);
+  if (uts_name)
+    bpf_probe_read_str(data->uts_name, sizeof(data->uts_name), uts_name);
 
   struct sk_buff *skb = (struct sk_buff *)PT_REGS_PARM2(ctx);
   struct tcphdr *tcp = (struct tcphdr *)skb_transport_header(skb);

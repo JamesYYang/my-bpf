@@ -2,16 +2,6 @@
 #include "bpf_helpers.h"
 #include "helper.h"
 
-struct execve_data
-{
-	u32 pid;
-	u32 tgid;
-	u32 ppid;
-	char comm[50];
-	char filename[50];
-	char uts_name[64];
-};
-
 /* BPF ringbuf map */
 struct
 {
@@ -29,7 +19,7 @@ static __always_inline char *get_task_uts_name(struct task_struct *task)
 SEC("tracepoint/syscalls/sys_enter_execve")
 int tracepoint_sys_enter_execve(struct trace_event_raw_sys_enter *ctx)
 {
-	struct execve_data *e;
+	struct sys_probe_event *e;
 
 	e = bpf_ringbuf_reserve(&sys_enter_execve_events, sizeof(*e), 0);
 	if (!e)

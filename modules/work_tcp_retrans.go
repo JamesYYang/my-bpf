@@ -17,14 +17,6 @@ type TCP_Retrans_Woker struct {
 	Woker
 }
 
-type TCP_Retrans_Event struct {
-	Sip   uint32
-	Dip   uint32
-	Sport uint16
-	Dport uint16
-	State uint8
-}
-
 func (w *TCP_Retrans_Woker) Name() string {
 	return w.name
 }
@@ -104,16 +96,21 @@ func (w *TCP_Retrans_Woker) Start() error {
 	return nil
 }
 
-func (w *TCP_Retrans_Woker) Decode(em *ebpf.Map, b []byte) (result string, err error) {
+func (w *TCP_Retrans_Woker) Decode(em *ebpf.Map, b []byte) (*BPFMessage, error) {
 	// Parse the ringbuf event entry into a bpfEvent structure.
-	var event TCP_Retrans_Event
+	var event TCP_Exception_Event
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
-		return "", err
+		return nil, err
 	}
-	return fmt.Sprintf("TCP Retransmit Event: [State: %d] [%s:%d] -> [%s:%d] \n",
-		event.State,
-		inet_ntoa(event.Sip), event.Sport,
-		inet_ntoa(event.Dip), event.Dport), nil
+	msg := NewMessage()
+	msg.FillEventBase(event.Probe_Event_Base)
+	msg.Event = NET_Retrans
+	msg.NET_SourceIP = inet_ntoa(event.Sip)
+	msg.NET_SourcePort = int(event.Sport)
+	msg.NET_DestIP = inet_ntoa(event.Dip)
+	msg.NET_DestPort = int(event.Dport)
+	msg.UtsName = unix.ByteSliceToString(event.UtsName[:])
+	return msg, nil
 
 }
 

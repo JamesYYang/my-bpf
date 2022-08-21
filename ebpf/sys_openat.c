@@ -4,16 +4,6 @@
 #include "bpf_tracing.h"
 #include "helper.h"
 
-struct openat_event
-{
-	u32 pid;
-	u32 tgid;
-	u32 ppid;
-	char comm[50];
-	char filename[256];
-	char uts_name[64];
-};
-
 /* BPF ringbuf map */
 struct
 {
@@ -31,7 +21,7 @@ static __always_inline char *get_task_uts_name(struct task_struct *task)
 SEC("tracepoint/syscalls/sys_enter_openat")
 int tracepoint_openat(struct trace_event_raw_sys_enter *ctx)
 {
-	struct openat_event *e;
+	struct sys_probe_event *e;
 	e = bpf_ringbuf_reserve(&sys_enter_openat_events, sizeof(*e), 0);
 	if (!e)
 	{

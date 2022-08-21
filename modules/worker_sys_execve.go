@@ -17,15 +17,6 @@ type Sys_Execve_Woker struct {
 	Woker
 }
 
-type Execve_Event struct {
-	Pid      uint32
-	Tgid     uint32
-	Ppid     uint32
-	Comm     [50]byte
-	Filename [50]byte
-	UtsName  [64]byte
-}
-
 func (w *Sys_Execve_Woker) Name() string {
 	return w.name
 }
@@ -104,15 +95,18 @@ func (w *Sys_Execve_Woker) Start() error {
 	return nil
 }
 
-func (w *Sys_Execve_Woker) Decode(em *ebpf.Map, b []byte) (result string, err error) {
+func (w *Sys_Execve_Woker) Decode(em *ebpf.Map, b []byte) (*BPFMessage, error) {
 	// Parse the ringbuf event entry into a bpfEvent structure.
-	var event Execve_Event
+	var event Sys_Event
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
-		return "", err
+		return nil, err
 	}
-	return fmt.Sprintf("comm: %s\t filename: %s\t UtsName: %s\t",
-		unix.ByteSliceToString(event.Comm[:]), unix.ByteSliceToString(event.Filename[:]),
-		unix.ByteSliceToString(event.UtsName[:])), nil
+	msg := NewMessage()
+	msg.Event = SYS_Execve
+	msg.FillEventBase(event.Probe_Event_Base)
+	msg.Filename = unix.ByteSliceToString(event.Filename[:])
+	msg.UtsName = unix.ByteSliceToString(event.UtsName[:])
+	return msg, nil
 }
 
 func init() {

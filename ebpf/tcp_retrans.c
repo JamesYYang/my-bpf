@@ -5,15 +5,6 @@
 #include "helper.h"
 #include "bpf_endian.h"
 
-struct retrans_sock_data
-{
-  u32 sip;   //源IP
-  u32 dip;   //目的IP
-  u16 sport; //源端口
-  u16 dport; //目的端口
-  u8 state;
-};
-
 /* BPF ringbuf map */
 struct
 {
@@ -21,6 +12,12 @@ struct
   __uint(max_entries, 256 * 1024 /* 256 KB */);
 } tcp_retrans_events SEC(".maps");
 
+static __always_inline char *get_task_uts_name(struct task_struct *task)
+{
+	struct nsproxy *np = READ_KERN(task->nsproxy);
+	struct uts_namespace *uts_ns = READ_KERN(np->uts_ns);
+	return READ_KERN(uts_ns->name.nodename);
+}
 
 SEC("kprobe/tcp_retransmit_skb")
 int kp_tcp_retransmit_skb(struct pt_regs *ctx)
@@ -31,18 +28,29 @@ int kp_tcp_retransmit_skb(struct pt_regs *ctx)
 
   if (family == AF_INET)
   {
-    struct retrans_sock_data *data;
+    struct exception_sock_data *data;
     data = bpf_ringbuf_reserve(&tcp_retrans_events, sizeof(*data), 0);
     if (!data)
     {
       return 0;
     }
 
+    struct task_struct *task = (struct task_struct *)bpf_get_current_task();
+
+    data->pid = READ_KERN(task->pid);
+    data->tgid = READ_KERN(task->tgid);
+    data->ppid = READ_KERN(READ_KERN(task->real_parent)->pid);
+    bpf_get_current_comm(data->comm, sizeof(data->comm));
+
+    char *uts_name = get_task_uts_name(task);
+    if (uts_name)
+      bpf_probe_read_str(data->uts_name, sizeof(data->uts_name), uts_name);
+
     data->dip = sk_common.skc_daddr;
     data->sip = sk_common.skc_rcv_saddr;
     data->dport = bpf_ntohs(sk_common.skc_dport);
     data->sport = sk_common.skc_num;
-    data->state = sk_common.skc_state;
+    // data->state = sk_common.skc_state;
 
     bpf_ringbuf_submit(data, 0);
   }

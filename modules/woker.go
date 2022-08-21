@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"my-bpf/config"
 	"os"
 
 	"github.com/cilium/ebpf"
@@ -17,7 +18,7 @@ type IWoker interface {
 	Run() error
 	Start() error
 	Init()
-	Decode(em *ebpf.Map, b []byte) (result string, err error)
+	Decode(em *ebpf.Map, b []byte) (*BPFMessage, error)
 }
 
 type Woker struct {
@@ -30,11 +31,28 @@ type Woker struct {
 
 var workers = make(map[string]IWoker)
 
+var mybpfConfig *config.Configuration
+
+func initConfig() {
+	log.Println("Read Config...")
+	bpfConfig, err := config.NewConfig()
+	if err != nil {
+		panic(err)
+	}
+	mybpfConfig = bpfConfig
+}
+
 func Register(w IWoker) {
+	if mybpfConfig == nil {
+		initConfig()
+	}
 	name := w.Name()
-	if MyBpfEnv.StartProbe != "" && name != MyBpfEnv.StartProbe {
+
+	wConfig, ok := mybpfConfig.WokerConfig[name]
+	if !ok || !wConfig.Enable {
 		return
 	}
+
 	if _, ok := workers[name]; !ok {
 		log.Printf("Register worker: %s", name)
 		workers[name] = w
@@ -69,9 +87,9 @@ func (w *Woker) Run() error {
 	return nil
 }
 
-func (w *Woker) Write(msg string) {
-	if msg != "" {
-		log.Println(msg)
+func (w *Woker) Write(msg *BPFMessage) {
+	if msg != nil {
+		HandlerMessage(msg)
 	}
 }
 
@@ -121,8 +139,7 @@ func (w *Woker) perfEventReader(errChan chan error, em *ebpf.Map) {
 			continue
 		}
 
-		var result string
-		result, err = w.core.Decode(em, record.RawSample)
+		result, err := w.core.Decode(em, record.RawSample)
 		if err != nil {
 			log.Printf("this.child.decode error:%v", err)
 			continue
@@ -152,8 +169,7 @@ func (w *Woker) ringbufEventReader(errChan chan error, em *ebpf.Map) {
 			return
 		}
 
-		var result string
-		result, err = w.core.Decode(em, record.RawSample)
+		result, err := w.core.Decode(em, record.RawSample)
 		if err != nil {
 			log.Printf("this.child.decode error:%v", err)
 			continue
