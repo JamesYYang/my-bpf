@@ -33,10 +33,9 @@ struct exception_sock_data
   u32 dip;   //目的IP
   u16 sport; //源端口
   u16 dport; //目的端口
-  char uts_name[65];
   u32 pid;
   u32 tgid;
   u32 ppid;
   char comm[50];
-  
+  char uts_name[65];
 };

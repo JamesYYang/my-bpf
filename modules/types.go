@@ -42,12 +42,12 @@ type TCP_Connect_Event struct {
 }
 
 type TCP_Exception_Event struct {
-	Sip     uint32
-	Dip     uint32
-	Sport   uint16
-	Dport   uint16
-	UtsName [65]byte
+	Sip   uint32
+	Dip   uint32
+	Sport uint16
+	Dport uint16
 	Probe_Event_Base
+	UtsName [65]byte
 }
 
 const (
