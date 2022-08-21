@@ -110,7 +110,7 @@ func (w *Sys_Execve_Woker) Decode(em *ebpf.Map, b []byte) (result string, err er
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("comm: %s\t filename: %s\t, UtsName: %s\t",
+	return fmt.Sprintf("comm: %s\t filename: %s\t UtsName: %s\t",
 		unix.ByteSliceToString(event.Comm[:]), unix.ByteSliceToString(event.Filename[:]),
 		unix.ByteSliceToString(event.UtsName[:])), nil
 }
