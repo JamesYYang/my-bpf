@@ -7,7 +7,7 @@ WokerConfig:
     Enable: false
   EBPFTCPConnectProbe: 
     Name: EBPFTCPConnectProbe
-    Enable: false
+    Enable: true
   EBPFTCPRetransProbe: 
     Name: EBPFTCPRetransProbe
     Enable: true

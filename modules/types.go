@@ -4,7 +4,7 @@ type Probe_Event_Base struct {
 	Pid  uint32
 	Tgid uint32
 	Ppid uint32
-	Comm [50]byte
+	Comm [16]byte
 }
 
 type Sys_Event struct {
@@ -42,11 +42,11 @@ type TCP_Connect_Event struct {
 }
 
 type TCP_Exception_Event struct {
-	Sip   uint32
-	Dip   uint32
-	Sport uint16
-	Dport uint16
 	Probe_Event_Base
+	Sip     uint32
+	Dip     uint32
+	Sport   uint16
+	Dport   uint16
 	UtsName [65]byte
 }
 

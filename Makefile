@@ -1,21 +1,18 @@
-all: build-ebpf build-assets build run
+all: build-ebpf build-assets build
 
 build-ebpf:
 	mkdir -p ebpf/bin
-	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ebpf/bin/sys_execve.o ebpf/sys_execve.c
-	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ebpf/bin/sys_openat.o ebpf/sys_openat.c
-	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ebpf/bin/tcp_connect.o ebpf/tcp_connect.c
-	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ebpf/bin/tcp_reset.o ebpf/tcp_reset.c
-	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ebpf/bin/tcp_retrans.o ebpf/tcp_retrans.c
+	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ./ebpf/bin/sys_execve.o ./ebpf/sys_execve.c
+	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ./ebpf/bin/sys_openat.o ./ebpf/sys_openat.c
+	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ./ebpf/bin/tcp_connect.o ./ebpf/tcp_connect.c
+	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ./ebpf/bin/tcp_reset.o ./ebpf/tcp_reset.c
+	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ./ebpf/bin/tcp_retrans.o ./ebpf/tcp_retrans.c
 
 build-assets:
-	go run github.com/shuLhan/go-bindata/cmd/go-bindata -pkg assets -o "assets/probe.go" $(wildcard ebpf/bin/*.o)
+	go run github.com/shuLhan/go-bindata/cmd/go-bindata -pkg assets -o "./assets/probe.go" $(wildcard ./ebpf/bin/*.o)
 
 build:
 	go build -o mbpf
-
-run:
-	BPF_STARTPROBE=EBPFSysOpenat ./mbpf
 
 clean:
 	rm -f ebpf/bin/*.o mbpf

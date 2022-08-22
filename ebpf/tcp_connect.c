@@ -10,7 +10,7 @@ struct sock_data
   u32 pid;
   u32 tgid;
   u32 ppid;
-  char comm[50];
+  char comm[16];
   char saddr[16];
   char daddr[16];
   u16 sport;

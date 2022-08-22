@@ -22,20 +22,20 @@ struct sys_probe_event
   u32 pid;
   u32 tgid;
   u32 ppid;
-  char comm[50];
+  char comm[16];
   char filename[256];
   char uts_name[65];
 };
 
 struct exception_sock_data
 {
+  u32 pid;
+  u32 tgid;
+  u32 ppid;
+  char comm[16];
   u32 sip;   //源IP
   u32 dip;   //目的IP
   u16 sport; //源端口
   u16 dport; //目的端口
-  u32 pid;
-  u32 tgid;
-  u32 ppid;
-  char comm[50];
   char uts_name[65];
 };
