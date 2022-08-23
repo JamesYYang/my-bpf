@@ -1,6 +1,10 @@
 FROM ubuntu:jammy
 
-RUN apt-get update && apt-get install -y golang-go make clang llvm dumb-init
+RUN apt-get update 
+
+RUN apt-get install -y ca-certificates
+
+RUN apt-get install -y golang-go make clang llvm dumb-init
 
 WORKDIR /dist
 
@@ -20,11 +24,7 @@ COPY ./mbpf.go /dist/
 
 COPY ./Makefile /dist/
 
-RUN go env -w GOPROXY=https://proxy.golang.com.cn,direct
-
-RUN go env -w GOINSECURE=github.com
-
-RUN go env
+RUN go env -w GOPROXY=https://goproxy.cn,direct
 
 RUN make
 
