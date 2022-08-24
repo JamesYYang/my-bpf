@@ -1,4 +1,4 @@
-all: build-ebpf build-assets build
+all: build-ebpf build-assets build run
 
 build-ebpf:
 	mkdir -p ebpf/bin
@@ -13,6 +13,9 @@ build-assets:
 
 build:
 	go build -o mbpf
+
+run:
+	./mbpf
 
 clean:
 	rm -f ebpf/bin/*.o mbpf

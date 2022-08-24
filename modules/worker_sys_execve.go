@@ -79,7 +79,7 @@ func (w *Sys_Execve_Woker) Start() error {
 	w.setupManager()
 	// initialize the bootstrap manager
 	if err := w.bpfManager.InitWithOptions(bytes.NewReader(buf), w.bpfManagerOptions); err != nil {
-		return errors.New("couldn't init manager")
+		return errors.New(fmt.Sprintf("couldn't init manager: %v", err))
 	}
 	// start the bootstrap manager
 	if err := w.bpfManager.Start(); err != nil {

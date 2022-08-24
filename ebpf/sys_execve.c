@@ -1,12 +1,12 @@
 #include "vmlinux.h"
 #include "bpf_helpers.h"
 #include "helper.h"
+#include "bpf_tracing.h"
 
-/* BPF ringbuf map */
+/* BPF perfbuf map */
 struct
 {
-	__uint(type, BPF_MAP_TYPE_RINGBUF);
-	__uint(max_entries, 256 * 1024 /* 256 KB */);
+	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
 } sys_enter_execve_events SEC(".maps");
 
 static __always_inline char *get_task_uts_name(struct task_struct *task)
@@ -19,15 +19,10 @@ static __always_inline char *get_task_uts_name(struct task_struct *task)
 SEC("tracepoint/syscalls/sys_enter_execve")
 int tracepoint_sys_enter_execve(struct trace_event_raw_sys_enter *ctx)
 {
-	struct sys_probe_event *e;
+	struct sys_probe_event t = {};
+	struct sys_probe_event *e = &t;
 
-	e = bpf_ringbuf_reserve(&sys_enter_execve_events, sizeof(*e), 0);
-	if (!e)
-	{
-		return 0;
-	}
 	struct task_struct *task = (struct task_struct *)bpf_get_current_task();
-
 	e->pid = READ_KERN(task->pid);
 	e->tgid = READ_KERN(task->tgid);
 	e->ppid = READ_KERN(READ_KERN(task->real_parent)->pid);
@@ -38,8 +33,7 @@ int tracepoint_sys_enter_execve(struct trace_event_raw_sys_enter *ctx)
 		bpf_probe_read_str(e->uts_name, sizeof(e->uts_name), uts_name);
 
 	bpf_probe_read_user_str(e->filename, sizeof(e->filename), (char *)(ctx->args[0]));
-
-	bpf_ringbuf_submit(e, 0);
+	bpf_perf_event_output(ctx, &sys_enter_execve_events, BPF_F_CURRENT_CPU, e, sizeof(*e));
 
 	return 0;
 }

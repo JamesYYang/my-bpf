@@ -1,16 +1,16 @@
 WokerConfig:
   EBPFSysExecve: 
     Name: EBPFSysExecve
-    Enable: false
+    Enable: true
   EBPFSysOpenat: 
     Name: EBPFSysOpenat
     Enable: false
   EBPFTCPConnectProbe: 
     Name: EBPFTCPConnectProbe
-    Enable: true
+    Enable: false
   EBPFTCPRetransProbe: 
     Name: EBPFTCPRetransProbe
-    Enable: true
+    Enable: false
   EBPFTCPRSTProbe: 
     Name: EBPFTCPRSTProbe
-    Enable: true
+    Enable: false
