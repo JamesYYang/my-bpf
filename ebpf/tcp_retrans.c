@@ -6,10 +6,16 @@
 #include "bpf_endian.h"
 
 /* BPF ringbuf map */
+// struct
+// {
+//   __uint(type, BPF_MAP_TYPE_RINGBUF);
+//   __uint(max_entries, 256 * 1024 /* 256 KB */);
+// } tcp_retrans_events SEC(".maps");
+
+/* BPF perfbuf map */
 struct
 {
-  __uint(type, BPF_MAP_TYPE_RINGBUF);
-  __uint(max_entries, 256 * 1024 /* 256 KB */);
+	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
 } tcp_retrans_events SEC(".maps");
 
 static __always_inline char *get_task_uts_name(struct task_struct *task)
@@ -28,12 +34,13 @@ int kp_tcp_retransmit_skb(struct pt_regs *ctx)
 
   if (family == AF_INET)
   {
-    struct exception_sock_data *data;
-    data = bpf_ringbuf_reserve(&tcp_retrans_events, sizeof(*data), 0);
-    if (!data)
-    {
-      return 0;
-    }
+    struct exception_sock_data t = {};
+    struct exception_sock_data *data = &t;
+    // data = bpf_ringbuf_reserve(&tcp_retrans_events, sizeof(*data), 0);
+    // if (!data)
+    // {
+    //   return 0;
+    // }
 
     struct task_struct *task = (struct task_struct *)bpf_get_current_task();
 
@@ -52,7 +59,7 @@ int kp_tcp_retransmit_skb(struct pt_regs *ctx)
     data->sport = sk_common.skc_num;
     // data->state = sk_common.skc_state;
 
-    bpf_ringbuf_submit(data, 0);
+    bpf_perf_event_output(ctx, &tcp_retrans_events, BPF_F_CURRENT_CPU, data, sizeof(*data));
   }
 
   return 0;
