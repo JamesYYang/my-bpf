@@ -1,4 +1,4 @@
-all: build-ebpf build-assets build run
+all: build-ebpf build-assets build
 
 build-ebpf:
 	mkdir -p ebpf/bin

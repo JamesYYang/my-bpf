@@ -24,17 +24,12 @@ func main() {
 	logger.Println("mbpf start...")
 	logger.Printf("process pid: %d\n", os.Getpid())
 
-	for n, w := range modules.GetWorkers() {
-		logger.Printf("start to run %s module", n)
-		w.Init()
-
-		// 加载ebpf，挂载到hook点上，开始监听
-		go func(worker modules.IWoker) {
-			err := worker.Run()
-			if err != nil {
-				logger.Printf("%v\n", err)
-			}
-		}(w)
+	wd, err := modules.NewWorkerDispatch()
+	if err != nil {
+		log.Printf("Start dispatch error: %v", err)
+	} else {
+		wd.InitWorkers()
+		wd.Run()
 	}
 
 	<-stopper

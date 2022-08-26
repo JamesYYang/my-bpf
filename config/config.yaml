@@ -1,16 +1,41 @@
 WokerConfig:
   EBPFSysExecve: 
-    Name: EBPFSysExecve
+    UID: MBPFSysExecveProbe
+    Section: tracepoint/syscalls/sys_enter_execve
+    EbpfFuncName: tracepoint_sys_enter_execve
+    AttachToFuncName: sys_enter_execve
+    MapName: sys_enter_execve_events
+    Asset: ebpf/bin/sys_execve.o
     Enable: false
   EBPFSysOpenat: 
-    Name: EBPFSysOpenat
+    UID: MBPFSysOpenatProbe
+    Section: tracepoint/syscalls/sys_enter_openat
+    EbpfFuncName: tracepoint_openat
+    AttachToFuncName: sys_enter_openat
+    MapName: sys_enter_openat_events
+    Asset: ebpf/bin/sys_openat.o
     Enable: false
   EBPFTCPConnectProbe: 
-    Name: EBPFTCPConnectProbe
+    UID: MBPFTCPConnectProbe
+    Section: tracepoint/sock/inet_sock_set_state
+    EbpfFuncName: tracepoint_inet_sock_set_state
+    AttachToFuncName: inet_sock_set_state
+    MapName: tcp_connect_events
+    Asset: ebpf/bin/tcp_connect.o
     Enable: true
   EBPFTCPRetransProbe: 
-    Name: EBPFTCPRetransProbe
+    UID: MBPFTCPRetransProbe
+    Section: kprobe/tcp_retransmit_skb
+    EbpfFuncName: kp_tcp_retransmit_skb
+    AttachToFuncName: tcp_retransmit_skb
+    MapName: tcp_retrans_events
+    Asset: ebpf/bin/tcp_retrans.o
     Enable: true
   EBPFTCPRSTProbe: 
-    Name: EBPFTCPRSTProbe
+    UID: MBPFTCPRSTProbe
+    Section: kprobe/tcp_v4_send_reset
+    EbpfFuncName: kp_tcp_v4_send_reset
+    AttachToFuncName: tcp_v4_send_reset
+    MapName: tcp_reset_events
+    Asset: ebpf/bin/tcp_reset.o
     Enable: true

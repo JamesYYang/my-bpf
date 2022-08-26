@@ -8,8 +8,13 @@ import (
 
 type (
 	WorkerConfiguration struct {
-		Name   string `yaml:"Name"`
-		Enable bool   `yaml:"Enable"`
+		UID              string `yaml:"UID"`
+		Section          string `yaml:"Section"`
+		EbpfFuncName     string `yaml:"EbpfFuncName"`
+		AttachToFuncName string `yaml:"AttachToFuncName"`
+		MapName          string `yaml:"MapName"`
+		Asset            string `yaml:"Asset"`
+		Enable           bool   `yaml:"Enable"`
 	}
 
 	Configuration struct {
