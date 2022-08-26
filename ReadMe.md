@@ -27,9 +27,6 @@ docker run -d \
   --name=mbpf \ 
   --net=host \ 
   --privileged \  
-  -v /lib/modules:/lib/modules:ro \
-  -v /usr/src:/usr/src:ro \
-  -v /boot:/boot:ro \
   -v /sys/kernel/debug:/sys/kernel/debug \
-  mbpf:0.0.1
+  mbpf:0.0.3
 ```
