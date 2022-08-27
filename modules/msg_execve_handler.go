@@ -33,6 +33,7 @@ func (h *Execve_Msg_Handler) Decode(b []byte) ([]byte, error) {
 	msg.FillEventBase(event.Probe_Event_Base)
 	msg.Filename = unix.ByteSliceToString(event.Filename[:])
 	msg.UtsName = unix.ByteSliceToString(event.UtsName[:])
+	msg.Filename += " " + unix.ByteSliceToString(event.Args[:])
 
 	jsonMsg, err := json.MarshalIndent(msg, "", "\t")
 	if err != nil {

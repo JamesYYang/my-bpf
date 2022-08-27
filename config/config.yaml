@@ -6,7 +6,7 @@ WokerConfig:
     AttachToFuncName: sys_enter_execve
     MapName: sys_enter_execve_events
     Asset: ebpf/bin/sys_execve.o
-    Enable: false
+    Enable: true
   EBPFSysOpenat: 
     UID: MBPFSysOpenatProbe
     Section: tracepoint/syscalls/sys_enter_openat
@@ -22,7 +22,7 @@ WokerConfig:
     AttachToFuncName: inet_sock_set_state
     MapName: tcp_connect_events
     Asset: ebpf/bin/tcp_connect.o
-    Enable: true
+    Enable: false
   EBPFTCPRetransProbe: 
     UID: MBPFTCPRetransProbe
     Section: kprobe/tcp_retransmit_skb
@@ -30,7 +30,7 @@ WokerConfig:
     AttachToFuncName: tcp_retransmit_skb
     MapName: tcp_retrans_events
     Asset: ebpf/bin/tcp_retrans.o
-    Enable: true
+    Enable: false
   EBPFTCPRSTProbe: 
     UID: MBPFTCPRSTProbe
     Section: kprobe/tcp_v4_send_reset
@@ -38,4 +38,4 @@ WokerConfig:
     AttachToFuncName: tcp_v4_send_reset
     MapName: tcp_reset_events
     Asset: ebpf/bin/tcp_reset.o
-    Enable: true
+    Enable: false

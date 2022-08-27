@@ -25,6 +25,7 @@ struct sys_probe_event
   char comm[16];
   char filename[256];
   char uts_name[65];
+  char args[64];
 };
 
 struct exception_sock_data

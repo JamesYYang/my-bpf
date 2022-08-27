@@ -33,6 +33,20 @@ int tracepoint_sys_enter_execve(struct trace_event_raw_sys_enter *ctx)
 		bpf_probe_read_str(e->uts_name, sizeof(e->uts_name), uts_name);
 
 	bpf_probe_read_user_str(e->filename, sizeof(e->filename), (char *)(ctx->args[0]));
+
+	char **args = (char **)(ctx->args[1]);
+
+	// for (int i = 1; i < 60; i++)
+	// {
+	char *argp = NULL;
+	bpf_probe_read(&argp, sizeof(argp), &args[1]);
+	if (argp)
+	{
+		// bpf_probe_read_user_str(e->args, sizeof(e->args), argp);
+		bpf_probe_read_str(e->args, sizeof(e->args), argp);
+	}
+	// }
+
 	bpf_perf_event_output(ctx, &sys_enter_execve_events, BPF_F_CURRENT_CPU, e, sizeof(*e));
 
 	return 0;

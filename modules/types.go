@@ -11,6 +11,7 @@ type Sys_Event struct {
 	Probe_Event_Base
 	Filename [256]byte
 	UtsName  [65]byte
+	Args     [64]byte
 }
 
 const (
