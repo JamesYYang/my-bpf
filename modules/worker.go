@@ -121,7 +121,7 @@ func (w *Woker) readEvents() error {
 
 func (w *Woker) perfEventReader(errChan chan error, em *ebpf.Map) {
 	log.Printf("[%s]begin to read from perfbuf", w.name)
-	rd, err := perf.NewReader(em, os.Getpagesize())
+	rd, err := perf.NewReader(em, w.config.PerfMapSize*os.Getpagesize())
 	if err != nil {
 		errChan <- fmt.Errorf("creating %s reader dns: %s", em.String(), err)
 		return

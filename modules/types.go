@@ -11,7 +11,14 @@ type Sys_Event struct {
 	Probe_Event_Base
 	Filename [256]byte
 	UtsName  [65]byte
-	Args     [64]byte
+}
+
+type Sys_Execve_Event struct {
+	Probe_Event_Base
+	BufSize  uint32
+	Filename [256]byte
+	UtsName  [65]byte
+	Args     [10240]byte
 }
 
 const (
@@ -28,6 +35,11 @@ const (
 	TCP_CLOSING      = 11
 	TCP_NEW_SYN_RECV = 12
 	TCP_MAX_STATES   = 13
+)
+
+const (
+	MAP_PERF = "PERF"
+	MAP_RING = "RING"
 )
 
 type TCP_Connect_Event struct {

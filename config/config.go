@@ -13,6 +13,7 @@ type (
 		EbpfFuncName     string `yaml:"EbpfFuncName"`
 		AttachToFuncName string `yaml:"AttachToFuncName"`
 		MapName          string `yaml:"MapName"`
+		PerfMapSize      int    `yaml:"PerfMapSize"`
 		Asset            string `yaml:"Asset"`
 		Enable           bool   `yaml:"Enable"`
 	}

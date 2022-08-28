@@ -25,7 +25,21 @@ struct sys_probe_event
   char comm[16];
   char filename[256];
   char uts_name[65];
-  char args[64];
+};
+
+#define MAX_PERCPU_BUFSIZE  10240
+#define MAX_STR_ARR_ELEM      40
+#define MAX_STRING_SIZE     4096 
+struct sys_execve_event
+{
+  u32 pid;
+  u32 tgid;
+  u32 ppid;
+  char comm[16];
+  u32 buf_off;
+  char filename[256];
+  char uts_name[65];
+  char args[MAX_PERCPU_BUFSIZE];
 };
 
 struct exception_sock_data

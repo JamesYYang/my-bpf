@@ -20,9 +20,8 @@ func main() {
 	stopper := make(chan os.Signal, 1)
 	signal.Notify(stopper, os.Interrupt, syscall.SIGTERM)
 
-	logger := log.Default()
-	logger.Println("mbpf start...")
-	logger.Printf("process pid: %d\n", os.Getpid())
+	log.Println("mbpf start...")
+	log.Printf("process pid: %d\n", os.Getpid())
 
 	wd, err := modules.NewWorkerDispatch()
 	if err != nil {
@@ -34,5 +33,5 @@ func main() {
 
 	<-stopper
 
-	logger.Println("Received signal, exiting program..")
+	log.Println("Received signal, exiting program..")
 }

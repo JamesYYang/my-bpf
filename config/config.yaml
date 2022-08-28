@@ -5,14 +5,16 @@ WokerConfig:
     EbpfFuncName: tracepoint_sys_enter_execve
     AttachToFuncName: sys_enter_execve
     MapName: sys_enter_execve_events
+    PerfMapSize: 3
     Asset: ebpf/bin/sys_execve.o
-    Enable: true
+    Enable: false
   EBPFSysOpenat: 
     UID: MBPFSysOpenatProbe
     Section: tracepoint/syscalls/sys_enter_openat
     EbpfFuncName: tracepoint_openat
     AttachToFuncName: sys_enter_openat
     MapName: sys_enter_openat_events
+    PerfMapSize: 1
     Asset: ebpf/bin/sys_openat.o
     Enable: false
   EBPFTCPConnectProbe: 
@@ -21,14 +23,16 @@ WokerConfig:
     EbpfFuncName: tracepoint_inet_sock_set_state
     AttachToFuncName: inet_sock_set_state
     MapName: tcp_connect_events
+    PerfMapSize: 1
     Asset: ebpf/bin/tcp_connect.o
-    Enable: false
+    Enable: true
   EBPFTCPRetransProbe: 
     UID: MBPFTCPRetransProbe
     Section: kprobe/tcp_retransmit_skb
     EbpfFuncName: kp_tcp_retransmit_skb
     AttachToFuncName: tcp_retransmit_skb
     MapName: tcp_retrans_events
+    PerfMapSize: 1
     Asset: ebpf/bin/tcp_retrans.o
     Enable: false
   EBPFTCPRSTProbe: 
@@ -37,5 +41,6 @@ WokerConfig:
     EbpfFuncName: kp_tcp_v4_send_reset
     AttachToFuncName: tcp_v4_send_reset
     MapName: tcp_reset_events
+    PerfMapSize: 1
     Asset: ebpf/bin/tcp_reset.o
     Enable: false
