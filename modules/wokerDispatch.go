@@ -27,6 +27,7 @@ func (wd *WokerDispatch) InitWorkers() {
 			w := &Woker{}
 			w.name = c.UID
 			w.config = c
+			w.extBTF = wd.BPFConfig.ExtBTF
 			w.msgHandler = msgHandlers[c.MapName]
 			wd.Wokers = append(wd.Wokers, w)
 		}

@@ -19,6 +19,7 @@ type (
 	}
 
 	Configuration struct {
+		ExtBTF      string                         `yaml:"ExtBTF"`
 		WokerConfig map[string]WorkerConfiguration `yaml:"WokerConfig"`
 	}
 )

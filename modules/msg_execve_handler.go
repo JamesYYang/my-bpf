@@ -24,7 +24,6 @@ func (h *Execve_Msg_Handler) Name() string {
 }
 
 func (h *Execve_Msg_Handler) Decode(b []byte) ([]byte, error) {
-	log.Println("begin decode message")
 	var event Sys_Execve_Event
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
 		return nil, err

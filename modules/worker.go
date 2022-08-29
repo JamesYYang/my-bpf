@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"github.com/cilium/ebpf"
+	"github.com/cilium/ebpf/btf"
 	"github.com/cilium/ebpf/perf"
 	"github.com/cilium/ebpf/ringbuf"
 	manager "github.com/ehids/ebpfmanager"
@@ -19,6 +20,7 @@ import (
 
 type Woker struct {
 	name              string
+	extBTF            string
 	config            config.WorkerConfiguration
 	bpfManager        *manager.Manager
 	bpfManagerOptions manager.Options
@@ -47,13 +49,29 @@ func (w *Woker) setupManager() {
 		DefaultKProbeMaxActive: 512,
 		VerifierOptions: ebpf.CollectionOptions{
 			Programs: ebpf.ProgramOptions{
-				LogSize: 2097152,
+				LogSize:     2097152,
+				KernelTypes: w.getBTFSpec(),
 			},
 		},
 		RLimit: &unix.Rlimit{
 			Cur: math.MaxUint64,
 			Max: math.MaxUint64,
 		},
+	}
+}
+
+func (w *Woker) getBTFSpec() *btf.Spec {
+	if w.extBTF == "" {
+		return nil
+	} else {
+		spec, err := btf.LoadSpec(w.extBTF)
+		if err != nil {
+			log.Printf("load external BTF from [%s], failed, %v", w.extBTF, err)
+			return nil
+		} else {
+			log.Printf("load external BTF from, %s", w.extBTF)
+			return spec
+		}
 	}
 }
 
