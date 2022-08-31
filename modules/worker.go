@@ -36,6 +36,8 @@ func (w *Woker) setupManager() {
 				Section:          w.config.Section,
 				EbpfFuncName:     w.config.EbpfFuncName,
 				AttachToFuncName: w.config.AttachToFuncName,
+				// Ifname:           "ens33",
+				// NetworkDirection: manager.Ingress,
 			},
 		},
 		Maps: []*manager.Map{
