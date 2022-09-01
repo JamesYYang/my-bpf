@@ -72,6 +72,12 @@ const (
 	NET_Connect = "TCP_CONNECT"
 )
 
+const (
+	EBPF_Trace  = "TracePoint"
+	EBPF_Kprobe = "Kprobe"
+	EBPF_TC     = "TC"
+)
+
 type BPFMessage struct {
 	Host_Name      string `json:"Host_Name"`
 	UtsName        string `json:"UtsName"`

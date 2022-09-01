@@ -22,10 +22,10 @@ func NewWorkerDispatch() (*WokerDispatch, error) {
 }
 
 func (wd *WokerDispatch) InitWorkers() {
-	for _, c := range wd.BPFConfig.WokerConfig {
+	for n, c := range wd.BPFConfig.WokerConfig {
 		if c.Enable {
 			w := &Woker{}
-			w.name = c.UID
+			w.name = n
 			w.config = c
 			w.extBTF = wd.BPFConfig.ExtBTF
 			w.msgHandler = msgHandlers[c.MapName]

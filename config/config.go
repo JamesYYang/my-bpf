@@ -8,14 +8,21 @@ import (
 
 type (
 	WorkerConfiguration struct {
+		EbpfType    string  `yaml:"EbpfType"`
+		PerfMapSize int     `yaml:"PerfMapSize"`
+		Asset       string  `yaml:"Asset"`
+		Enable      bool    `yaml:"Enable"`
+		Probes      []Probe `yaml:"Probes"`
+		MapName     string  `yaml:"MapName"`
+	}
+
+	Probe struct {
 		UID              string `yaml:"UID"`
 		Section          string `yaml:"Section"`
 		EbpfFuncName     string `yaml:"EbpfFuncName"`
 		AttachToFuncName string `yaml:"AttachToFuncName"`
-		MapName          string `yaml:"MapName"`
-		PerfMapSize      int    `yaml:"PerfMapSize"`
-		Asset            string `yaml:"Asset"`
-		Enable           bool   `yaml:"Enable"`
+		Ifname           string `yaml:"Ifname"`
+		NetworkDirection string `yaml:"NetworkDirection"`
 	}
 
 	Configuration struct {

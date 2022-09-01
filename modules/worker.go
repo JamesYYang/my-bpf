@@ -28,23 +28,44 @@ type Woker struct {
 	msgHandler        IMsgHandler
 }
 
+func (w *Woker) setupTraceManager() {
+	w.bpfManager = &manager.Manager{}
+	for _, p := range w.config.Probes {
+		probe := &manager.Probe{
+			UID:              p.UID,
+			Section:          p.Section,
+			EbpfFuncName:     p.EbpfFuncName,
+			AttachToFuncName: p.AttachToFuncName,
+		}
+		w.bpfManager.Probes = append(w.bpfManager.Probes, probe)
+	}
+}
+
+func (w *Woker) setupTCManager() {
+	w.bpfManager = &manager.Manager{}
+	for _, p := range w.config.Probes {
+		probe := &manager.Probe{
+			//show filter
+			//tc filter show dev eth0 ingress(egress)
+			// customize deleteed TC filter
+			// tc filter del dev eth0 ingress(egress)
+			Section:          p.Section,
+			EbpfFuncName:     p.EbpfFuncName,
+			Ifname:           p.Ifname,
+			NetworkDirection: manager.Ingress,
+		}
+		if p.NetworkDirection == "Egress" {
+			probe.NetworkDirection = manager.Egress
+		}
+		w.bpfManager.Probes = append(w.bpfManager.Probes, probe)
+	}
+}
+
 func (w *Woker) setupManager() {
-	w.bpfManager = &manager.Manager{
-		Probes: []*manager.Probe{
-			{
-				UID:              w.config.UID,
-				Section:          w.config.Section,
-				EbpfFuncName:     w.config.EbpfFuncName,
-				AttachToFuncName: w.config.AttachToFuncName,
-				// Ifname:           "ens33",
-				// NetworkDirection: manager.Ingress,
-			},
-		},
-		Maps: []*manager.Map{
-			{
-				Name: w.config.MapName,
-			},
-		},
+	if w.config.EbpfType == EBPF_TC {
+		w.setupTCManager()
+	} else {
+		w.setupTraceManager()
 	}
 
 	w.bpfManagerOptions = manager.Options{
