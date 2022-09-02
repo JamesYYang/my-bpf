@@ -63,11 +63,11 @@ WokerConfig:
     Probes:
       - Section: classifier/ingress
         EbpfFuncName: ingress_cls_func
-        Ifname: ens33
+        Ifname: docker0
         NetworkDirection: Ingress
       - Section: classifier/egress
         EbpfFuncName: egress_cls_func
-        Ifname: ens33
+        Ifname: docker0
         NetworkDirection: Egress
     MapName: tc_capture_events
     

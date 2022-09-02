@@ -30,6 +30,15 @@ struct sys_probe_event
 #define MAX_PERCPU_BUFSIZE  10240
 #define MAX_STR_ARR_ELEM      40
 #define MAX_STRING_SIZE     4096 
+
+#define TC_ACT_UNSPEC         (-1)
+#define TC_ACT_OK               0
+#define TC_ACT_SHOT             2
+#define TC_ACT_STOLEN           4
+#define TC_ACT_REDIRECT         7
+
+#define ETH_P_IP 0x0800 /* Internet Protocol packet        */
+
 struct sys_execve_event
 {
   u32 pid;
