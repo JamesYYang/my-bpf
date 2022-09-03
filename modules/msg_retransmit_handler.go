@@ -25,7 +25,7 @@ func (h *TcpRetrans_Msg_Handler) Name() string {
 
 func (h *TcpRetrans_Msg_Handler) Decode(b []byte) ([]byte, error) {
 	// Parse the ringbuf event entry into a bpfEvent structure.
-	var event TCP_Exception_Event
+	var event Net_Socket_Event
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
 		return nil, err
 	}

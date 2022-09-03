@@ -1,6 +1,7 @@
 package modules
 
 type Probe_Event_Base struct {
+	TS   uint64
 	Pid  uint32
 	Tgid uint32
 	Ppid uint32
@@ -42,7 +43,7 @@ const (
 	MAP_RING = "RING"
 )
 
-type TCP_Connect_Event struct {
+type Net_Tcp_Event struct {
 	Probe_Event_Base
 	Saddr    [16]byte
 	Daddr    [16]byte
@@ -54,13 +55,24 @@ type TCP_Connect_Event struct {
 	UtsName  [65]byte
 }
 
-type TCP_Exception_Event struct {
+type Net_Socket_Event struct {
 	Probe_Event_Base
 	Sip     uint32
 	Dip     uint32
 	Sport   uint16
 	Dport   uint16
 	UtsName [65]byte
+}
+
+type Net_Packet_Event struct {
+	TS        uint64
+	Len       uint32
+	Ifindex   uint32
+	Sip       uint32
+	Dip       uint32
+	Sport     uint16
+	Dport     uint16
+	IsIngress bool
 }
 
 const (
@@ -70,6 +82,7 @@ const (
 	NET_Rest    = "TCP_RESET"
 	NET_Accept  = "TCP_ACCEPT"
 	NET_Connect = "TCP_CONNECT"
+	TC_Package  = "TC_Package"
 )
 
 const (
@@ -79,6 +92,7 @@ const (
 )
 
 type BPFMessage struct {
+	TS             uint64 `json:"TS"`
 	Host_Name      string `json:"Host_Name"`
 	UtsName        string `json:"UtsName"`
 	Host_IP        string `json:"Host_IP"`

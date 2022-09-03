@@ -31,6 +31,7 @@ func NewMessage() *BPFMessage {
 }
 
 func (msg *BPFMessage) FillEventBase(eb Probe_Event_Base) {
+	msg.TS = eb.TS
 	msg.Pid = int(eb.Pid)
 	msg.Tgid = int(eb.Tgid)
 	msg.Ppid = int(eb.Ppid)

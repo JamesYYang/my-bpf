@@ -29,6 +29,7 @@ static inline bool skb_revalidate_data(struct __sk_buff *skb, u8 **head, u8 **ta
     return true;
 }
 
+// https://github.com/aquasecurity/tracee/blob/main/pkg/ebpf/c/tracee.bpf.c#L6060
 static inline int capture_packets(struct __sk_buff *skb, bool is_ingress) {
 
     // packet data
@@ -36,6 +37,12 @@ static inline int capture_packets(struct __sk_buff *skb, bool is_ingress) {
     unsigned char *data_end = (void *)(long)skb->data_end;
     u32 data_len = (u32)skb->len;
     u32 l4_hdr_off;
+
+    struct net_packet_event pkt = {0};
+    pkt.ts = bpf_ktime_get_ns();
+    pkt.len = skb->len;
+    pkt.ifindex = skb->ifindex;
+    pkt.ingress = is_ingress;
 
     // Ethernet headers
     struct ethhdr *eth = (struct ethhdr *)data_start;
@@ -63,15 +70,20 @@ static inline int capture_packets(struct __sk_buff *skb, bool is_ingress) {
         return TC_ACT_OK;
     }
 
+    pkt.dip = iph->daddr;
+    pkt.sip = iph->saddr;
+
     if (!skb_revalidate_data(skb, &data_start, &data_end, l4_hdr_off + sizeof(struct tcphdr)))
     {
         return TC_ACT_OK;
     }
     struct tcphdr *tcp = (struct tcphdr *) (data_start + l4_hdr_off);
 
-    bpf_printk("capture_packets port : %d, dest port :%d\n", bpf_ntohs(tcp->source), bpf_ntohs(tcp->dest));
+    pkt.dport = bpf_ntohs(tcp->dest);
+    pkt.sport = bpf_ntohs(tcp->source);
+
+    bpf_perf_event_output(skb, &tc_capture_events, BPF_F_CURRENT_CPU, &pkt, sizeof(pkt));
     
-    bpf_printk("new packet captured on egress/ingress (TC), length:%d\n", data_len);
     return TC_ACT_OK;
 }
 
@@ -84,7 +96,7 @@ int egress_cls_func(struct __sk_buff *skb) {
 // ingress_cls_func is called for packets that are coming into the network
 SEC("classifier/ingress")
 int ingress_cls_func(struct __sk_buff *skb) {
-    return capture_packets(skb, false);
+    return capture_packets(skb, true);
 };
 
 char _license[] SEC("license") = "GPL";

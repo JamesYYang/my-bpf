@@ -49,7 +49,7 @@ int tracepoint_sys_enter_execve(struct trace_event_raw_sys_enter *ctx)
 	// {
 	// 	return 0;
 	// }
-
+  e->ts = bpf_ktime_get_ns();
 	struct task_struct *task = (struct task_struct *)bpf_get_current_task();
 	e->pid = READ_KERN(task->pid);
 	e->tgid = READ_KERN(task->tgid);

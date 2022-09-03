@@ -34,8 +34,8 @@ int kp_tcp_retransmit_skb(struct pt_regs *ctx)
 
   if (family == AF_INET)
   {
-    struct exception_sock_data t = {};
-    struct exception_sock_data *data = &t;
+    struct net_sock_event t = {};
+    struct net_sock_event *data = &t;
     // data = bpf_ringbuf_reserve(&tcp_retrans_events, sizeof(*data), 0);
     // if (!data)
     // {
@@ -43,7 +43,7 @@ int kp_tcp_retransmit_skb(struct pt_regs *ctx)
     // }
 
     struct task_struct *task = (struct task_struct *)bpf_get_current_task();
-
+    data->ts = bpf_ktime_get_ns();
     data->pid = READ_KERN(task->pid);
     data->tgid = READ_KERN(task->tgid);
     data->ppid = READ_KERN(READ_KERN(task->real_parent)->pid);

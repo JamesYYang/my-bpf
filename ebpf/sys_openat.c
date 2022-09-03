@@ -36,7 +36,7 @@ int tracepoint_openat(struct trace_event_raw_sys_enter *ctx)
 	// }
 
 	struct task_struct *task = (struct task_struct *)bpf_get_current_task();
-
+  e->ts = bpf_ktime_get_ns();
 	e->pid = READ_KERN(task->pid);
 	e->tgid = READ_KERN(task->tgid);
 	e->ppid = READ_KERN(READ_KERN(task->real_parent)->pid);

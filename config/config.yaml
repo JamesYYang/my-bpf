@@ -25,7 +25,7 @@ WokerConfig:
   EBPFTCPConnectProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_connect.o
-    Enable: false
+    Enable: true
     EbpfType: Trace
     Probes:
       - UID: MBPFTCPConnectProbe

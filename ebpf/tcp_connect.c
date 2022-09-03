@@ -5,8 +5,9 @@
 #include "helper.h"
 #include "bpf_endian.h"
 
-struct sock_data
+struct net_tcp_event
 {
+  u64 ts;
   u32 pid;
   u32 tgid;
   u32 ppid;
@@ -34,6 +35,11 @@ struct
 	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
 } tcp_connect_events SEC(".maps");
 
+struct
+{
+	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
+} tcp_kconnect_events SEC(".maps");
+
 static __always_inline char *get_task_uts_name(struct task_struct *task)
 {
   struct nsproxy *np = READ_KERN(task->nsproxy);
@@ -54,8 +60,8 @@ int tracepoint_inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *c
   u16 family = ctx->family;
   if (family == AF_INET)
   {
-    struct sock_data t = {};
-    struct sock_data *data = &t;
+    struct net_tcp_event t = {};
+    struct net_tcp_event *data = &t;
     // data = bpf_ringbuf_reserve(&tcp_connect_events, sizeof(*data), 0);
     // if (!data)
     // {
@@ -63,7 +69,7 @@ int tracepoint_inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *c
     // }
 
     struct task_struct *task = (struct task_struct *)bpf_get_current_task();
-
+    data->ts = bpf_ktime_get_ns();
     data->pid = READ_KERN(task->pid);
     data->tgid = READ_KERN(task->tgid);
     data->ppid = READ_KERN(READ_KERN(task->real_parent)->pid);

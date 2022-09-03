@@ -24,7 +24,7 @@ func (h *Connect_Msg_Handler) Name() string {
 }
 
 func (h *Connect_Msg_Handler) Decode(b []byte) ([]byte, error) {
-	var event TCP_Connect_Event
+	var event Net_Tcp_Event
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
 		return nil, err
 	}

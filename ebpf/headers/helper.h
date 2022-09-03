@@ -19,6 +19,7 @@
 
 struct sys_probe_event
 {
+  u64 ts;
   u32 pid;
   u32 tgid;
   u32 ppid;
@@ -41,6 +42,7 @@ struct sys_probe_event
 
 struct sys_execve_event
 {
+  u64 ts;
   u32 pid;
   u32 tgid;
   u32 ppid;
@@ -51,8 +53,9 @@ struct sys_execve_event
   char args[MAX_PERCPU_BUFSIZE];
 };
 
-struct exception_sock_data
+struct net_sock_event
 {
+  u64 ts;
   u32 pid;
   u32 tgid;
   u32 ppid;
@@ -62,4 +65,16 @@ struct exception_sock_data
   u16 sport; //源端口
   u16 dport; //目的端口
   char uts_name[65];
+};
+
+struct net_packet_event
+{
+  u64 ts;
+  u32 len;
+  u32 ifindex;
+  u32 sip;   //源IP
+  u32 dip;   //目的IP
+  u16 sport; //源端口
+  u16 dport; //目的端口
+  bool ingress;
 };
