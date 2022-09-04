@@ -61,13 +61,15 @@ WokerConfig:
     Enable: true
     EbpfType: TC
     Probes:
-      - Section: classifier/ingress
+      - UID: MBPFTCProbeIngress
+        Section: classifier/ingress
         EbpfFuncName: ingress_cls_func
-        Ifname: docker0
+        Ifname: All
         NetworkDirection: Ingress
-      - Section: classifier/egress
+      - UID: MBPFTCProbeEgress
+        Section: classifier/egress
         EbpfFuncName: egress_cls_func
-        Ifname: docker0
+        Ifname: All
         NetworkDirection: Egress
     MapName: tc_capture_events
     

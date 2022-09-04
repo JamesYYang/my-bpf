@@ -8,6 +8,7 @@ import (
 	"math"
 	"my-bpf/assets"
 	"my-bpf/config"
+	"net"
 	"os"
 
 	"github.com/cilium/ebpf"
@@ -44,21 +45,53 @@ func (w *Woker) setupTraceManager() {
 func (w *Woker) setupTCManager() {
 	w.bpfManager = &manager.Manager{}
 	for _, p := range w.config.Probes {
-		probe := &manager.Probe{
-			//show filter
-			//tc filter show dev eth0 ingress(egress)
-			// customize deleteed TC filter
-			// tc filter del dev eth0 ingress(egress)
-			Section:          p.Section,
-			EbpfFuncName:     p.EbpfFuncName,
-			Ifname:           p.Ifname,
-			NetworkDirection: manager.Ingress,
+		if p.Ifname == "All" {
+			inets, err := net.Interfaces()
+			if err != nil {
+				panic(fmt.Sprintf("list interface failed, error: %v", err))
+			}
+
+			for _, i := range inets {
+				if i.Flags&net.FlagLoopback == net.FlagLoopback {
+					continue
+				}
+				probe := &manager.Probe{
+					//show filter
+					//tc filter show dev eth0 ingress(egress)
+					// customize deleteed TC filter
+					// tc filter del dev eth0 ingress(egress)
+					UID:              p.UID + "_" + i.Name,
+					Section:          p.Section,
+					EbpfFuncName:     p.EbpfFuncName,
+					Ifname:           i.Name,
+					NetworkDirection: manager.Ingress,
+				}
+				if p.NetworkDirection == "Egress" {
+					probe.NetworkDirection = manager.Egress
+				}
+				w.bpfManager.Probes = append(w.bpfManager.Probes, probe)
+				log.Printf("add tc hook to net interface: %s", i.Name)
+			}
+		} else {
+			probe := &manager.Probe{
+				//show filter
+				//tc filter show dev eth0 ingress(egress)
+				// customize deleteed TC filter
+				// tc filter del dev eth0 ingress(egress)
+				UID:              p.UID,
+				Section:          p.Section,
+				EbpfFuncName:     p.EbpfFuncName,
+				Ifname:           p.Ifname,
+				NetworkDirection: manager.Ingress,
+			}
+			if p.NetworkDirection == "Egress" {
+				probe.NetworkDirection = manager.Egress
+			}
+			w.bpfManager.Probes = append(w.bpfManager.Probes, probe)
+			log.Printf("add tc hook to net interface: %s", p.Ifname)
 		}
-		if p.NetworkDirection == "Egress" {
-			probe.NetworkDirection = manager.Egress
-		}
-		w.bpfManager.Probes = append(w.bpfManager.Probes, probe)
 	}
+
 }
 
 func (w *Woker) setupManager() {
@@ -215,5 +248,13 @@ func (w *Woker) Decode(b []byte) {
 		log.Printf("decode error:%v", err)
 	} else if msg != nil {
 		log.Println(string(msg))
+	}
+}
+
+func (w *Woker) Stop() {
+	log.Printf("stopping worker: %s", w.name)
+	err := w.bpfManager.Stop(manager.CleanAll)
+	if err != nil {
+		log.Printf("stop worker: %s failed, error: %v", w.name, err)
 	}
 }

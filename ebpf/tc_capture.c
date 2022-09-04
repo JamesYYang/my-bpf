@@ -79,6 +79,10 @@ static inline int capture_packets(struct __sk_buff *skb, bool is_ingress) {
     }
     struct tcphdr *tcp = (struct tcphdr *) (data_start + l4_hdr_off);
 
+    // if (tcp->source == bpf_htons(22) || tcp->dest == bpf_htons(22)) {
+    //     return TC_ACT_OK;
+    // }
+
     pkt.dport = bpf_ntohs(tcp->dest);
     pkt.sport = bpf_ntohs(tcp->source);
 

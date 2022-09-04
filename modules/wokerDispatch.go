@@ -46,3 +46,9 @@ func (wd *WokerDispatch) Run() {
 		}(w)
 	}
 }
+
+func (wd *WokerDispatch) Stop() {
+	for _, w := range wd.Wokers {
+		w.Stop()
+	}
+}

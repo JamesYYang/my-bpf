@@ -33,5 +33,7 @@ func main() {
 
 	<-stopper
 
+	wd.Stop()
+
 	log.Println("Received signal, exiting program..")
 }
