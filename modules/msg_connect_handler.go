@@ -3,8 +3,7 @@ package modules
 import (
 	"bytes"
 	"encoding/binary"
-	"encoding/json"
-	"log"
+	"fmt"
 
 	"golang.org/x/sys/unix"
 )
@@ -49,10 +48,15 @@ func (h *Connect_Msg_Handler) Decode(b []byte) ([]byte, error) {
 		return nil, nil
 	}
 
-	jsonMsg, err := json.MarshalIndent(msg, "", "\t")
-	if err != nil {
-		log.Printf("log mesaage failed: %s", err.Error())
-	}
+	// jsonMsg, err := json.MarshalIndent(msg, "", "\t")
+	// if err != nil {
+	// 	log.Printf("log mesaage failed: %s", err.Error())
+	// }
 
-	return jsonMsg, nil
+	// return jsonMsg, nil
+
+	strMsg := fmt.Sprintf("[%s] [%s:%d] -> [%s:%d]", msg.Event,
+		msg.NET_SourceIP, msg.NET_SourcePort,
+		msg.NET_DestIP, msg.NET_DestPort)
+	return []byte(strMsg), nil
 }

@@ -3,9 +3,7 @@ package modules
 import (
 	"bytes"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
-	"log"
 )
 
 type Tc_Msg_Handler struct {
@@ -42,10 +40,15 @@ func (h *Tc_Msg_Handler) Decode(b []byte) ([]byte, error) {
 	msg.NET_DestIP = inet_ntoa(event.Sip)
 	msg.NET_DestPort = int(event.Sport)
 
-	jsonMsg, err := json.MarshalIndent(msg, "", "\t")
-	if err != nil {
-		log.Printf("log mesaage failed: %s", err.Error())
-	}
+	// jsonMsg, err := json.MarshalIndent(msg, "", "\t")
+	// if err != nil {
+	// 	log.Printf("log mesaage failed: %s", err.Error())
+	// }
 
-	return jsonMsg, nil
+	// return jsonMsg, nil
+
+	strMsg := fmt.Sprintf("[%s - %s] [%s:%d] -> [%s:%d] (%d bytes on net interface %d)", msg.Event, action,
+		msg.NET_SourceIP, msg.NET_SourcePort,
+		msg.NET_DestIP, msg.NET_DestPort, event.Len, event.Ifindex)
+	return []byte(strMsg), nil
 }
