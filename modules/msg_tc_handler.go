@@ -34,11 +34,10 @@ func (h *Tc_Msg_Handler) Decode(b []byte) ([]byte, error) {
 	if !event.IsIngress {
 		action = "send"
 	}
-	msg.Filename = fmt.Sprintf("%s package for length %d in eth %d ", action, event.Len, event.Ifindex)
-	msg.NET_SourceIP = inet_ntoa(event.Dip)
-	msg.NET_SourcePort = int(event.Dport)
-	msg.NET_DestIP = inet_ntoa(event.Sip)
-	msg.NET_DestPort = int(event.Sport)
+	msg.NET_SourceIP = inet_ntoa(event.Sip)
+	msg.NET_SourcePort = int(event.Sport)
+	msg.NET_DestIP = inet_ntoa(event.Dip)
+	msg.NET_DestPort = int(event.Dport)
 
 	// jsonMsg, err := json.MarshalIndent(msg, "", "\t")
 	// if err != nil {
@@ -46,9 +45,9 @@ func (h *Tc_Msg_Handler) Decode(b []byte) ([]byte, error) {
 	// }
 
 	// return jsonMsg, nil
-
 	strMsg := fmt.Sprintf("[%s - %s] [%s:%d] -> [%s:%d] (%d bytes on net interface %d)", msg.Event, action,
 		msg.NET_SourceIP, msg.NET_SourcePort,
 		msg.NET_DestIP, msg.NET_DestPort, event.Len, event.Ifindex)
+
 	return []byte(strMsg), nil
 }

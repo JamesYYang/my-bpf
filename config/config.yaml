@@ -64,12 +64,12 @@ WokerConfig:
       - UID: MBPFTCProbeIngress
         Section: classifier/ingress
         EbpfFuncName: ingress_cls_func
-        Ifname: All
+        Ifname: ens33
         NetworkDirection: Ingress
       - UID: MBPFTCProbeEgress
         Section: classifier/egress
         EbpfFuncName: egress_cls_func
-        Ifname: All
+        Ifname: veth4a1fb1d
         NetworkDirection: Egress
     MapName: tc_capture_events
     
