@@ -38,3 +38,17 @@ docker run -d \
   -v /sys/kernel/debug:/sys/kernel/debug \
   jamesyyang/mbpf:0.0.4
 ```
+
+## Reference
+
+[Cilium：BPF 和 XDP 参考指南](https://arthurchiao.art/blog/cilium-bpf-xdp-reference-guide-zh/)
+
+[BPF 程序（BPF Prog）类型详解](https://arthurchiao.art/blog/bpf-advanced-notes-1-zh/)
+
+[eBPF观测HTTP](https://mp.weixin.qq.com/s/2ncM-PvN06lSwScvc2Zueg)
+
+[Facebook 流量路由最佳实践](http://arthurchiao.art/blog/facebook-from-xdp-to-socket-zh/)
+
+[基于 BPF/XDP 实现 K8s Service 负载均衡](http://arthurchiao.art/blog/cilium-k8s-service-lb-zh/)
+
+[Cracking Kubernetes Node Proxy](http://arthurchiao.art/blog/cracking-k8s-node-proxy/)
