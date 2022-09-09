@@ -55,21 +55,33 @@ WokerConfig:
         EbpfFuncName: kp_tcp_v4_send_reset
         AttachToFuncName: tcp_v4_send_reset
     MapName: tcp_reset_events
+  EBPTCDNSProbe: 
+    PerfMapSize: 1
+    Asset: ebpf/bin/tc_dns.o
+    Enable: true
+    EbpfType: TC
+    Probes:
+      - UID: MBPFXDPProbe
+        Section: classifier/egress
+        EbpfFuncName: tc_dns_func
+        Ifname: ens33
+        NetworkDirection: Egress
+    MapName: tc_dns_events
   EBPFTCProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tc_capture.o
-    Enable: true
+    Enable: false
     EbpfType: TC
     Probes:
       - UID: MBPFTCProbeIngress
         Section: classifier/ingress
         EbpfFuncName: ingress_cls_func
-        Ifname: veth87b760e
+        Ifname: ens33
         NetworkDirection: Ingress
       - UID: MBPFTCProbeEgress
         Section: classifier/egress
         EbpfFuncName: egress_cls_func
-        Ifname: veth87b760e
+        Ifname: ens33
         NetworkDirection: Egress
     MapName: tc_capture_events
     

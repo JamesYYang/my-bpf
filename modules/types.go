@@ -89,6 +89,7 @@ const (
 	EBPF_Trace  = "TracePoint"
 	EBPF_Kprobe = "Kprobe"
 	EBPF_TC     = "TC"
+	EBPF_XDP    = "XDP"
 )
 
 type BPFMessage struct {

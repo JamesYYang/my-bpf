@@ -42,6 +42,19 @@ func (w *Woker) setupTraceManager() {
 	}
 }
 
+func (w *Woker) setupXDPManager() {
+	w.bpfManager = &manager.Manager{}
+	for _, p := range w.config.Probes {
+		probe := &manager.Probe{
+			UID:          p.UID,
+			Section:      p.Section,
+			EbpfFuncName: p.EbpfFuncName,
+			Ifname:       p.Ifname,
+		}
+		w.bpfManager.Probes = append(w.bpfManager.Probes, probe)
+	}
+}
+
 func (w *Woker) setupTCManager() {
 	w.bpfManager = &manager.Manager{}
 	for _, p := range w.config.Probes {
@@ -97,6 +110,8 @@ func (w *Woker) setupTCManager() {
 func (w *Woker) setupManager() {
 	if w.config.EbpfType == EBPF_TC {
 		w.setupTCManager()
+	} else if w.config.EbpfType == EBPF_XDP {
+		w.setupXDPManager()
 	} else {
 		w.setupTraceManager()
 	}

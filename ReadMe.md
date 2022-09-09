@@ -41,6 +41,8 @@ docker run -d \
 
 ## Reference
 
+[深入理解 iptables 和 netfilter 架构](http://arthurchiao.art/blog/deep-dive-into-iptables-and-netfilter-arch-zh/)
+
 [Cilium：BPF 和 XDP 参考指南](https://arthurchiao.art/blog/cilium-bpf-xdp-reference-guide-zh/)
 
 [BPF 程序（BPF Prog）类型详解](https://arthurchiao.art/blog/bpf-advanced-notes-1-zh/)
