@@ -54,3 +54,7 @@ docker run -d \
 [基于 BPF/XDP 实现 K8s Service 负载均衡](http://arthurchiao.art/blog/cilium-k8s-service-lb-zh/)
 
 [Cracking Kubernetes Node Proxy](http://arthurchiao.art/blog/cracking-k8s-node-proxy/)
+
+[Life of a Packet in Cilium](http://arthurchiao.art/blog/cilium-life-of-a-packet-pod-to-service-zh/)
+
+[深入理解 Cilium 的 eBPF 收发包路径](http://arthurchiao.art/blog/understanding-ebpf-datapath-in-cilium-zh/)
