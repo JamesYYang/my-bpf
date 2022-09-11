@@ -117,7 +117,6 @@ static inline int create_ar_response(struct ar_hdr *ar, char *dns_buffer, size_t
   // Check for OPT record (RFC6891)
   if (ar->type == bpf_htons(41))
   {
-    bpf_printk("OPT record found");
     struct ar_hdr *ar_response = (struct ar_hdr *)&dns_buffer[0];
     // We've received an OPT record, advertising the clients' UDP payload size
     // Respond that we're serving a payload size of 512 and not serving any additional records.
@@ -179,7 +178,7 @@ int tc_dns_func(struct __sk_buff *ctx)
 
       struct dns_hdr *dns_hdr;
       // Boundary check for minimal DNS header
-      if (data + ETH_HLEN + IP_HLEN + UDP_HLEN + sizeof(*dns_hdr) > data_end)
+      if (data + ETH_HLEN + IP_HLEN + UDP_HLEN + DNS_HLEN > data_end)
       {
         return TC_ACT_OK;
       }
@@ -190,7 +189,7 @@ int tc_dns_func(struct __sk_buff *ctx)
       if (dns_hdr->qr == 0 && dns_hdr->opcode == 0)
       {
         // Get a pointer to the start of the DNS query
-        void *query_start = (void *)dns_hdr + sizeof(struct dns_hdr);
+        void *query_start = (void *)dns_hdr + DNS_HLEN;
         // We will only be parsing a single query for now
         struct dns_query q;
         int query_length = 0;
@@ -231,11 +230,9 @@ int tc_dns_func(struct __sk_buff *ctx)
         }
 
         // // Start our response [query_length] bytes beyond the header
-        void *answer_start = (void *)dns_hdr + sizeof(struct dns_hdr) + query_length;
+        void *answer_start = (void *)dns_hdr + DNS_HLEN + query_length;
         // // Determine increment of packet buffer
-        // int tailadjust = answer_start + buf_size - data_end;
         int tailadjust = answer_start + buf_size - data;
-
         // // Adjust packet length accordingly
         if (bpf_skb_change_tail(ctx, tailadjust, 0) < 0)
         {
@@ -249,20 +246,20 @@ int tc_dns_func(struct __sk_buff *ctx)
           data_end = (void *)(unsigned long)ctx->data_end;
 
           // Copy bytes from our temporary buffer to packet buffer
-          int aOffset = sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct udphdr) + sizeof(struct dns_hdr) + query_length;
+          int aOffset = ETH_HLEN + IP_HLEN + UDP_HLEN + DNS_HLEN + query_length;
           bpf_skb_store_bytes(ctx, aOffset, &dns_buffer[0], buf_size, 0);
           eth = data;
-          ip = data + sizeof(struct ethhdr);
-          udp = data + sizeof(struct ethhdr) + sizeof(struct iphdr);
+          ip = data + ETH_HLEN;
+          udp = data + ETH_HLEN + IP_HLEN;
 
           // Do a new boundary check
-          if (data + sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct udphdr) > data_end)
+          if (data + ETH_HLEN + IP_HLEN + UDP_HLEN > data_end)
           {
             return TC_ACT_OK;
           }
           // Adjust UDP length and IP length
-          uint16_t iplen = bpf_htons((data_end - data) - sizeof(struct ethhdr));
-          uint16_t udplen = bpf_htons((data_end - data) - sizeof(struct ethhdr) - sizeof(struct iphdr));
+          uint16_t iplen = bpf_htons((data_end - data) - ETH_HLEN);
+          uint16_t udplen = bpf_htons((data_end - data) - ETH_HLEN - IP_HLEN);
           changeLength(ctx, iplen, udplen);
           swap_mac_addresses(ctx);
           swap_ip_addresses(ctx);

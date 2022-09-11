@@ -147,6 +147,7 @@ static inline void swap_mac_addresses(struct __sk_buff *skb)
 #define ETH_HLEN sizeof(struct ethhdr)
 #define IP_HLEN sizeof(struct iphdr)
 #define UDP_HLEN sizeof(struct udphdr)
+#define DNS_HLEN sizeof(struct dns_hdr)
 
 #define IP_SRC_OFF (ETH_HLEN + offsetof(struct iphdr, saddr))
 #define IP_DST_OFF (ETH_HLEN + offsetof(struct iphdr, daddr))
