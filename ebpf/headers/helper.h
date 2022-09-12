@@ -15,7 +15,6 @@
   })
 
 #define memset(dest, chr, n) __builtin_memset((dest), (chr), (n))
-
 #define memcpy(dest, src, n) __builtin_memcpy((dest), (src), (n))
 
 #define AF_INET 2
@@ -156,7 +155,6 @@ static inline void swap_mac_addresses(struct __sk_buff *skb)
 #define UDP_SPT_OFF (ETH_HLEN + IP_HLEN + offsetof(struct udphdr, source))
 #define UDP_DPT_OFF (ETH_HLEN + IP_HLEN + offsetof(struct udphdr, dest))
 #define UDP_CHK_OFF (ETH_HLEN + IP_HLEN + offsetof(struct udphdr, check))
-#define IS_PSEUDO 0x10
 
 static inline void swap_ip_addresses(struct __sk_buff *skb)
 {

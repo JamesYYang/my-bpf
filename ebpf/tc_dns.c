@@ -5,7 +5,10 @@
 #include "helper.h"
 #include "bpf_endian.h"
 
-char dns_buffer[512];
+struct dns_heap
+{
+  char dns_buffer[512];
+};
 
 /* BPF perfbuf map */
 struct
@@ -13,15 +16,23 @@ struct
   __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
 } tc_dns_events SEC(".maps");
 
+// 一个 struct event 变量的大小超过了 512 字节，无法放到 BPF 栈上，
+// 因此声明一个 size=1 的 per-CPU array 来存放 event 变量
+struct
+{
+	__uint(type, BPF_MAP_TYPE_PERCPU_ARRAY); // per-cpu array
+	__uint(max_entries, 1);
+	__type(key, int);
+	__type(value, struct dns_heap);
+} heap SEC(".maps");
+
 // Parse query and return query length
 static inline int parse_query(struct __sk_buff *ctx, void *query_start, struct dns_query *q)
 {
   void *data_end = (void *)(long)ctx->data_end;
-
   uint16_t i;
   void *cursor = query_start;
   int namepos = 0;
-
   // Fill dns_query.name with zero bytes
   // Not doing so will make the verifier complain when dns_query is used as a key in bpf_map_lookup
   memset(&q->name[0], 0, sizeof(q->name));
@@ -33,14 +44,12 @@ static inline int parse_query(struct __sk_buff *ctx, void *query_start, struct d
   // We'll loop through the packet byte by byte until we reach '0' in order to get the dns query name
   for (i = 0; i < MAX_DNS_NAME_LENGTH; i++)
   {
-
     // Boundary check of cursor. Verifier requires a +1 here.
     // Probably because we are advancing the pointer at the end of the loop
     if (cursor + 1 > data_end)
     {
       break;
     }
-
     // If separator is zero we've reached the end of the domain query
     if (*(char *)(cursor) == 0)
     {
@@ -59,7 +68,6 @@ static inline int parse_query(struct __sk_buff *ctx, void *query_start, struct d
       // Return the bytecount of (namepos + current '0' byte + dns type + dns class) as the query length.
       return namepos + 1 + 2 + 2;
     }
-
     // Read and fill data into struct
     q->name[namepos] = *(char *)(cursor);
     namepos++;
@@ -142,17 +150,22 @@ int tc_dns_func(struct __sk_buff *ctx)
 {
   uint64_t start = bpf_ktime_get_ns();
 
+  int zero = 0;
+	struct dns_heap *e;
+	e = bpf_map_lookup_elem(&heap, &zero);
+	if (!e) /* can't happen */
+	{
+		return 0;
+	}
+
   void *data_end = (void *)(unsigned long)ctx->data_end;
   void *data = (void *)(unsigned long)ctx->data;
-
   // Boundary check: check if packet is larger than a full ethernet + ip header
   if (data + ETH_HLEN + IP_HLEN > data_end)
   {
     return TC_ACT_OK;
   }
-
   struct ethhdr *eth = data;
-
   // Ignore packet if ethernet protocol is not IP-based
   if (eth->h_proto != bpf_htons(ETH_P_IP))
   {
@@ -160,7 +173,6 @@ int tc_dns_func(struct __sk_buff *ctx)
   }
 
   struct iphdr *ip = data + ETH_HLEN;
-
   if (ip->protocol == IPPROTO_UDP)
   {
     struct udphdr *udp;
@@ -169,22 +181,17 @@ int tc_dns_func(struct __sk_buff *ctx)
     {
       return TC_ACT_OK;
     }
-
     udp = data + ETH_HLEN + IP_HLEN;
-
     // Check if dest port equals 53
     if (udp->dest == bpf_htons(53))
     {
-
       struct dns_hdr *dns_hdr;
       // Boundary check for minimal DNS header
       if (data + ETH_HLEN + IP_HLEN + UDP_HLEN + DNS_HLEN > data_end)
       {
         return TC_ACT_OK;
       }
-
       dns_hdr = data + ETH_HLEN + IP_HLEN + UDP_HLEN;
-
       // Check if header contains a standard query
       if (dns_hdr->qr == 0 && dns_hdr->opcode == 0)
       {
@@ -215,7 +222,7 @@ int tc_dns_func(struct __sk_buff *ctx)
         modify_dns_header_response(dns_hdr);
 
         // Create DNS response and add to temporary buffer.
-        create_query_response(&a_record, &dns_buffer[buf_size], &buf_size);
+        create_query_response(&a_record, &e->dns_buffer[buf_size], &buf_size);
 
         // If an additional record is present 如果请求包中有附加记录
         if (dns_hdr->add_count > 0)
@@ -225,7 +232,7 @@ int tc_dns_func(struct __sk_buff *ctx)
           if (parse_ar(ctx, dns_hdr, query_length, &ar) != -1)
           {
             // Create AR response and add to temporary buffer
-            create_ar_response(&ar, &dns_buffer[buf_size], &buf_size);
+            create_ar_response(&ar, &e->dns_buffer[buf_size], &buf_size);
           }
         }
 
@@ -247,7 +254,7 @@ int tc_dns_func(struct __sk_buff *ctx)
 
           // Copy bytes from our temporary buffer to packet buffer
           int aOffset = ETH_HLEN + IP_HLEN + UDP_HLEN + DNS_HLEN + query_length;
-          bpf_skb_store_bytes(ctx, aOffset, &dns_buffer[0], buf_size, 0);
+          bpf_skb_store_bytes(ctx, aOffset, &e->dns_buffer[0], buf_size, 0);
           eth = data;
           ip = data + ETH_HLEN;
           udp = data + ETH_HLEN + IP_HLEN;
