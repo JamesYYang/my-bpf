@@ -147,6 +147,9 @@ func (w *Woker) getBTFSpec() *btf.Spec {
 }
 
 func (w *Woker) setupEventMap() error {
+	if w.config.MapName == "" {
+		return nil
+	}
 	em, found, err := w.bpfManager.GetMap(w.config.MapName)
 	if err != nil {
 		return err
@@ -155,6 +158,25 @@ func (w *Woker) setupEventMap() error {
 		return errors.New(fmt.Sprintf("cant found map:%s", w.config.MapName))
 	}
 	w.eventMap = em
+	return nil
+}
+
+func (w *Woker) setupKernelMap() error {
+	log.Printf("setup kernel map [%s] for worker [%s]", w.config.MapToKernel, w.name)
+	if w.config.MapToKernel == "" {
+		return nil
+	}
+	em, found, err := w.bpfManager.GetMap(w.config.MapToKernel)
+	if err != nil {
+		return err
+	}
+	if !found {
+		return errors.New(fmt.Sprintf("cant found map:%s", w.config.MapToKernel))
+	}
+	err = w.msgHandler.SetupKernelMap(em)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -176,6 +198,11 @@ func (w *Woker) Run() error {
 		return errors.New("couldn't start bootstrap manager")
 	}
 
+	err = w.setupKernelMap()
+	if err != nil {
+		return err
+	}
+
 	err = w.setupEventMap()
 	if err != nil {
 		return err
@@ -190,6 +217,9 @@ func (w *Woker) Run() error {
 }
 
 func (w *Woker) readEvents() error {
+	if w.eventMap == nil {
+		return nil
+	}
 	var errChan = make(chan error, 8)
 	event := w.eventMap
 	log.Printf("[%s] begin read events", w.name)

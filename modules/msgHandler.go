@@ -4,12 +4,14 @@ import (
 	"log"
 	"os"
 
+	"github.com/cilium/ebpf"
 	"golang.org/x/sys/unix"
 )
 
 type IMsgHandler interface {
 	Name() string
 	Decode(b []byte) ([]byte, error)
+	SetupKernelMap(m *ebpf.Map) error
 }
 
 var msgHandlers = make(map[string]IMsgHandler)

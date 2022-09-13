@@ -75,6 +75,12 @@ type Net_Packet_Event struct {
 	IsIngress bool
 }
 
+type Net_DNS_Event struct {
+	RecordType uint16
+	Class      uint16
+	Name       [256]byte
+}
+
 const (
 	SYS_Execve  = "SYS_Execve"
 	SYS_Openat  = "SYS_Openat"
@@ -83,6 +89,7 @@ const (
 	NET_Accept  = "TCP_ACCEPT"
 	NET_Connect = "TCP_CONNECT"
 	TC_Package  = "TC_Package"
+	NET_DNS     = "UDP_DNS"
 )
 
 const (

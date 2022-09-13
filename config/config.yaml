@@ -66,6 +66,7 @@ WokerConfig:
         EbpfFuncName: tc_dns_func
         Ifname: ens33
         NetworkDirection: Egress
+    MapToKernel: dns_a_records
     MapName: tc_dns_events
   EBPFTCProbe: 
     PerfMapSize: 1

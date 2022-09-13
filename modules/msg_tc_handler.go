@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+
+	"github.com/cilium/ebpf"
 )
 
 type Tc_Msg_Handler struct {
@@ -18,6 +20,10 @@ func init() {
 
 func (h *Tc_Msg_Handler) Name() string {
 	return h.name
+}
+
+func (h *Tc_Msg_Handler) SetupKernelMap(m *ebpf.Map) error {
+	panic("tc probe not need update kernel map")
 }
 
 func (h *Tc_Msg_Handler) Decode(b []byte) ([]byte, error) {

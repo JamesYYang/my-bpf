@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/cilium/ebpf"
 	"golang.org/x/sys/unix"
 )
 
@@ -21,6 +22,10 @@ func init() {
 
 func (h *Execve_Msg_Handler) Name() string {
 	return h.name
+}
+
+func (h *Execve_Msg_Handler) SetupKernelMap(m *ebpf.Map) error {
+	panic("sys execve probe not need update kernel map")
 }
 
 func (h *Execve_Msg_Handler) Decode(b []byte) ([]byte, error) {

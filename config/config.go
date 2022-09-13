@@ -14,6 +14,7 @@ type (
 		Enable      bool    `yaml:"Enable"`
 		Probes      []Probe `yaml:"Probes"`
 		MapName     string  `yaml:"MapName"`
+		MapToKernel string  `yaml:"MapToKernel"`
 	}
 
 	Probe struct {

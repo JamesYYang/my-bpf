@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/cilium/ebpf"
 	"golang.org/x/sys/unix"
 )
 
@@ -20,6 +21,10 @@ func init() {
 
 func (h *TcpReset_Msg_Handler) Name() string {
 	return h.name
+}
+
+func (h *TcpReset_Msg_Handler) SetupKernelMap(m *ebpf.Map) error {
+	panic("tcp reset probe not need update kernel map")
 }
 
 func (h *TcpReset_Msg_Handler) Decode(b []byte) ([]byte, error) {

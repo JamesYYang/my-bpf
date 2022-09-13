@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/cilium/ebpf"
 	"golang.org/x/sys/unix"
 )
 
@@ -16,6 +17,10 @@ func init() {
 	h := &Connect_Msg_Handler{}
 	h.name = "tcp_connect_events"
 	RegisterMsgHandler(h)
+}
+
+func (h *Connect_Msg_Handler) SetupKernelMap(m *ebpf.Map) error {
+	panic("Connect probe not need update kernel map")
 }
 
 func (h *Connect_Msg_Handler) Name() string {

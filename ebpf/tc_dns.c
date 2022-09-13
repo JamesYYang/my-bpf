@@ -10,20 +10,29 @@ struct dns_heap
   char dns_buffer[512];
 };
 
+struct
+{
+  __uint(type, BPF_MAP_TYPE_HASH);
+  __type(key, struct dns_query);
+  __type(value, struct a_record);
+  __uint(max_entries, 65536);
+} dns_a_records SEC(".maps");
+
 /* BPF perfbuf map */
 struct
 {
   __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
 } tc_dns_events SEC(".maps");
 
+
 // 一个 struct event 变量的大小超过了 512 字节，无法放到 BPF 栈上，
 // 因此声明一个 size=1 的 per-CPU array 来存放 event 变量
 struct
 {
-	__uint(type, BPF_MAP_TYPE_PERCPU_ARRAY); // per-cpu array
-	__uint(max_entries, 1);
-	__type(key, int);
-	__type(value, struct dns_heap);
+  __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY); // per-cpu array
+  __uint(max_entries, 1);
+  __type(key, int);
+  __type(value, struct dns_heap);
 } heap SEC(".maps");
 
 // Parse query and return query length
@@ -39,7 +48,7 @@ static inline int parse_query(struct __sk_buff *ctx, void *query_start, struct d
   // Fill record_type and class with default values to satisfy verifier
   q->record_type = 0;
   q->class = 0;
-
+  
   // We create a bounded loop of MAX_DNS_NAME_LENGTH (maximum allowed dns name size).
   // We'll loop through the packet byte by byte until we reach '0' in order to get the dns query name
   for (i = 0; i < MAX_DNS_NAME_LENGTH; i++)
@@ -144,6 +153,30 @@ static inline int create_ar_response(struct ar_hdr *ar, char *dns_buffer, size_t
   return 0;
 }
 
+static int match_a_records(struct dns_query *q, struct a_record *a)
+{
+  bpf_printk("DNS record type: %i", q->record_type);
+  bpf_printk("DNS class: %i", q->class);
+  bpf_printk("DNS name: %s", q->name);
+
+  struct a_record *record;
+
+  record = bpf_map_lookup_elem(&dns_a_records, q);
+  // If record pointer is not zero..
+  if (record > 0)
+  {
+    bpf_printk("DNS query matched");
+    bpf_printk("DNS IP: %i", record->ip_addr);
+    bpf_printk("DNS TTL: %i", record->ttl);
+
+    a->ip_addr = record->ip_addr;
+    a->ttl = record->ttl;
+    return 0;
+  }
+  bpf_printk("DNS query failed");
+  return -1;
+  
+}
 // egress_cls_func is called for packets that are going out of the network
 SEC("classifier/egress")
 int tc_dns_func(struct __sk_buff *ctx)
@@ -151,12 +184,12 @@ int tc_dns_func(struct __sk_buff *ctx)
   uint64_t start = bpf_ktime_get_ns();
 
   int zero = 0;
-	struct dns_heap *e;
-	e = bpf_map_lookup_elem(&heap, &zero);
-	if (!e) /* can't happen */
-	{
-		return 0;
-	}
+  struct dns_heap *e;
+  e = bpf_map_lookup_elem(&heap, &zero);
+  if (!e) /* can't happen */
+  {
+    return 0;
+  }
 
   void *data_end = (void *)(unsigned long)ctx->data_end;
   void *data = (void *)(unsigned long)ctx->data;
@@ -206,17 +239,16 @@ int tc_dns_func(struct __sk_buff *ctx)
           return TC_ACT_OK;
         }
 
-        bpf_printk("DNS query from port %u", bpf_ntohs(udp->source));
-        bpf_printk("DNS record type: %i", q.record_type);
-        bpf_printk("DNS class: %i", q.class);
-        bpf_printk("DNS name: %s", q.name);
-
         size_t buf_size = 0;
         // Check if query matches a record in our hash table
         struct a_record a_record;
 
-        a_record.ip_addr = 0x846F070A;
-        a_record.ttl = 120;
+        int res = match_a_records(&q, &a_record);
+
+        if (res < 0)
+        {
+          return TC_ACT_OK;
+        }
 
         // Change DNS header to a valid response header
         modify_dns_header_response(dns_hdr);
@@ -276,6 +308,7 @@ int tc_dns_func(struct __sk_buff *ctx)
           uint64_t elapsed = end - start;
           bpf_printk("Time elapsed: %d", elapsed);
 
+          // bpf_perf_event_output(ctx, &tc_dns_events, BPF_F_CURRENT_CPU, &q, sizeof(q));
           // Redirecting the modified skb on the same interface to be transmitted again
           return bpf_redirect(ctx->ifindex, BPF_F_INGRESS);
         }
