@@ -162,7 +162,6 @@ func (w *Woker) setupEventMap() error {
 }
 
 func (w *Woker) setupKernelMap() error {
-	log.Printf("setup kernel map [%s] for worker [%s]", w.config.MapToKernel, w.name)
 	if w.config.MapToKernel == "" {
 		return nil
 	}

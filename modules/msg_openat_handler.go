@@ -16,7 +16,7 @@ type Openat_Msg_Handler struct {
 
 func init() {
 	h := &Openat_Msg_Handler{}
-	h.name = "sys_enter_openat_events"
+	h.name = "mh_sys_enter_openat"
 	RegisterMsgHandler(h)
 }
 

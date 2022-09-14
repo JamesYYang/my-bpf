@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"bytes"
 	"encoding/binary"
 	"log"
 	"net"
@@ -25,16 +24,16 @@ type DNSRecord struct {
 	TTL uint32
 }
 
-func (dq *DNSQuery) MarshalBinary() ([]byte, error) {
-	data := new(bytes.Buffer)
-	err := binary.Write(data, binary.LittleEndian, dq)
-	log.Printf("do marshal binary")
-	return data.Bytes(), err
-}
+// func (dq *DNSQuery) MarshalBinary() ([]byte, error) {
+// 	data := new(bytes.Buffer)
+// 	err := binary.Write(data, binary.LittleEndian, dq)
+// 	log.Printf("do marshal binary")
+// 	return data.Bytes(), err
+// }
 
 func init() {
 	h := &DNS_Msg_Handler{}
-	h.name = "tc_dns_events"
+	h.name = "mh_tc_dns"
 	RegisterMsgHandler(h)
 }
 

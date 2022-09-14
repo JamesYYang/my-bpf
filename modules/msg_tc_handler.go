@@ -14,7 +14,7 @@ type Tc_Msg_Handler struct {
 
 func init() {
 	h := &Tc_Msg_Handler{}
-	h.name = "tc_capture_events"
+	h.name = "mh_tc_capture"
 	RegisterMsgHandler(h)
 }
 

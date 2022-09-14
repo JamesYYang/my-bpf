@@ -15,7 +15,7 @@ type TcpRetrans_Msg_Handler struct {
 
 func init() {
 	h := &TcpRetrans_Msg_Handler{}
-	h.name = "tcp_retrans_events"
+	h.name = "mh_tcp_retrans"
 	RegisterMsgHandler(h)
 }
 

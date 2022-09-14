@@ -13,6 +13,7 @@ WokerConfig:
         EbpfFuncName: tracepoint_sys_enter_execve
         AttachToFuncName: sys_enter_execve
     MapName: sys_enter_execve_events
+    MsgHandler: mh_sys_enter_execve
   EBPFSysOpenat: 
     PerfMapSize: 1
     Asset: ebpf/bin/sys_openat.o
@@ -24,6 +25,7 @@ WokerConfig:
         EbpfFuncName: tracepoint_openat
         AttachToFuncName: sys_enter_openat
     MapName: sys_enter_openat_events
+    MsgHandler: mh_sys_enter_openat
   EBPFTCPConnectProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_connect.o
@@ -35,6 +37,7 @@ WokerConfig:
         EbpfFuncName: tracepoint_inet_sock_set_state
         AttachToFuncName: inet_sock_set_state
     MapName: tcp_connect_events
+    MsgHandler: mh_tcp_connect
   EBPFTCPRetransProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_retrans.o
@@ -46,6 +49,7 @@ WokerConfig:
         EbpfFuncName: kp_tcp_retransmit_skb
         AttachToFuncName: tcp_retransmit_skb
     MapName: tcp_retrans_events
+    MsgHandler: mh_tcp_retrans
   EBPFTCPRSTProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_reset.o
@@ -57,6 +61,7 @@ WokerConfig:
         EbpfFuncName: kp_tcp_v4_send_reset
         AttachToFuncName: tcp_v4_send_reset
     MapName: tcp_reset_events
+    MsgHandler: mh_tcp_reset
   EBPTCDNSProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tc_dns.o
@@ -69,7 +74,7 @@ WokerConfig:
         Ifname: ens33
         NetworkDirection: Egress
     MapToKernel: dns_a_records
-    MapName: tc_dns_events
+    MsgHandler: mh_tc_dns
   EBPFTCProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tc_capture.o
@@ -87,4 +92,5 @@ WokerConfig:
         Ifname: ens33
         NetworkDirection: Egress
     MapName: tc_capture_events
+    MsgHandler: mh_tc_capture
     

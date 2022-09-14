@@ -15,7 +15,7 @@ type TcpReset_Msg_Handler struct {
 
 func init() {
 	h := &TcpReset_Msg_Handler{}
-	h.name = "tcp_reset_events"
+	h.name = "mh_tcp_reset"
 	RegisterMsgHandler(h)
 }
 

@@ -16,7 +16,7 @@ type Execve_Msg_Handler struct {
 
 func init() {
 	h := &Execve_Msg_Handler{}
-	h.name = "sys_enter_execve_events"
+	h.name = "mh_sys_enter_execve"
 	RegisterMsgHandler(h)
 }
 

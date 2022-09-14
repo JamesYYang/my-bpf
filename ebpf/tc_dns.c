@@ -18,13 +18,6 @@ struct
   __uint(max_entries, 65536);
 } dns_a_records SEC(".maps");
 
-/* BPF perfbuf map */
-struct
-{
-  __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
-} tc_dns_events SEC(".maps");
-
-
 // 一个 struct event 变量的大小超过了 512 字节，无法放到 BPF 栈上，
 // 因此声明一个 size=1 的 per-CPU array 来存放 event 变量
 struct

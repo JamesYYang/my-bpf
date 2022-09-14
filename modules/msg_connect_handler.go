@@ -15,7 +15,7 @@ type Connect_Msg_Handler struct {
 
 func init() {
 	h := &Connect_Msg_Handler{}
-	h.name = "tcp_connect_events"
+	h.name = "mh_tcp_connect"
 	RegisterMsgHandler(h)
 }
 

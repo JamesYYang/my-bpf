@@ -15,6 +15,7 @@ type (
 		Probes      []Probe `yaml:"Probes"`
 		MapName     string  `yaml:"MapName"`
 		MapToKernel string  `yaml:"MapToKernel"`
+		MsgHandler  string  `yaml:"MsgHandler"`
 	}
 
 	Probe struct {
