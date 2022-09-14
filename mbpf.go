@@ -2,13 +2,17 @@ package main
 
 import (
 	"log"
+	"my-bpf/k8s"
 	"my-bpf/modules"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/cilium/ebpf/rlimit"
 )
+
+var once sync.Once
 
 func main() {
 
@@ -27,6 +31,16 @@ func main() {
 	if err != nil {
 		log.Printf("Start dispatch error: %v", err)
 	} else {
+		if wd.BPFConfig.EnableK8S {
+			k8sReady := make(chan bool)
+			wd.K8SWatcher = k8s.NewWatcher(wd.BPFConfig, func() {
+				once.Do(func() { k8sReady <- true })
+			})
+
+			go wd.K8SWatcher.Run()
+
+			<-k8sReady
+		}
 		wd.InitWorkers()
 		wd.Run()
 	}

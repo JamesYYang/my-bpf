@@ -3,11 +3,13 @@ package modules
 import (
 	"log"
 	"my-bpf/config"
+	"my-bpf/k8s"
 )
 
 type WokerDispatch struct {
-	Wokers    []*Woker
-	BPFConfig *config.Configuration
+	Wokers     []*Woker
+	BPFConfig  *config.Configuration
+	K8SWatcher *k8s.Watcher
 }
 
 func NewWorkerDispatch() (*WokerDispatch, error) {

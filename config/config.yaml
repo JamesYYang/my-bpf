@@ -1,4 +1,6 @@
 ExtBTF: 
+EnableK8S: false
+IsInK8S: false
 WokerConfig:
   EBPFSysExecve: 
     PerfMapSize: 3
