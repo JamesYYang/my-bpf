@@ -28,6 +28,7 @@ func (wd *WokerDispatch) InitWorkers() {
 		if c.Enable {
 			w := &Woker{}
 			w.name = n
+			w.wd = wd
 			w.config = c
 			w.extBTF = wd.BPFConfig.ExtBTF
 			w.msgHandler = msgHandlers[c.MsgHandler]

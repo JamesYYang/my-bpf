@@ -22,6 +22,7 @@ import (
 type Woker struct {
 	name              string
 	extBTF            string
+	wd                *WokerDispatch
 	config            config.WorkerConfiguration
 	bpfManager        *manager.Manager
 	bpfManagerOptions manager.Options
@@ -172,7 +173,7 @@ func (w *Woker) setupKernelMap() error {
 	if !found {
 		return errors.New(fmt.Sprintf("cant found map:%s", w.config.MapToKernel))
 	}
-	err = w.msgHandler.SetupKernelMap(em)
+	err = w.msgHandler.SetupKernelMap(em, w.wd.K8SWatcher.ServiceAdd, w.wd.K8SWatcher.ServiceRemove)
 	if err != nil {
 		return err
 	}

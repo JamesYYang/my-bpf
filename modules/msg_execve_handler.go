@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"log"
+	"my-bpf/k8s"
 
 	"github.com/cilium/ebpf"
 	"golang.org/x/sys/unix"
@@ -24,7 +25,7 @@ func (h *Execve_Msg_Handler) Name() string {
 	return h.name
 }
 
-func (h *Execve_Msg_Handler) SetupKernelMap(m *ebpf.Map) error {
+func (h *Execve_Msg_Handler) SetupKernelMap(m *ebpf.Map, sd chan k8s.NetAddress, sr chan k8s.NetAddress) error {
 	panic("sys execve probe not need update kernel map")
 }
 

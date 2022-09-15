@@ -2,6 +2,7 @@ package modules
 
 import (
 	"log"
+	"my-bpf/k8s"
 	"os"
 
 	"github.com/cilium/ebpf"
@@ -11,7 +12,7 @@ import (
 type IMsgHandler interface {
 	Name() string
 	Decode(b []byte) ([]byte, error)
-	SetupKernelMap(m *ebpf.Map) error
+	SetupKernelMap(m *ebpf.Map, sd chan k8s.NetAddress, sr chan k8s.NetAddress) error
 }
 
 var msgHandlers = make(map[string]IMsgHandler)

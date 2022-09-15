@@ -11,27 +11,15 @@ import (
 type (
 	EndpointCtroller struct {
 		sync.RWMutex
+		w         *Watcher
 		Endpoints map[string]*EndpointInfo
 	}
 
 	EndpointInfo struct {
-		sync.Mutex
 		Name            string
 		Namespace       string
 		ResourceVersion string
-		CurrentIndex    int
-		Address         []PodAddress
-	}
-
-	PodAddress struct {
-		Host  string
-		IP    string
-		Ports []PodPort
-	}
-
-	PodPort struct {
-		Name string
-		Port int32
+		Address         []NetAddress
 	}
 )
 
@@ -41,9 +29,12 @@ func (e *EndpointCtroller) EndpointChanged(endPoint *corev1.Endpoints, isDelete 
 	if ok && old.ResourceVersion == endPoint.ResourceVersion {
 		return
 	}
-
 	e.Lock()
 	defer e.Unlock()
+
+	if ok {
+		e.w.IpCtrl.RemoveEndpoint(old.Address)
+	}
 
 	if isDelete {
 		log.Printf("endpoint removed: [%s.%s]\n", endPoint.Name, endPoint.Namespace)
@@ -67,32 +58,22 @@ func (e *EndpointCtroller) EndpointChanged(endPoint *corev1.Endpoints, isDelete 
 			old.ResourceVersion = endPoint.ResourceVersion
 			old.Address = newAddress
 		}
+		e.w.IpCtrl.AddEndpoint(newAddress)
 	}
 }
 
-func parseSubset(subsets []corev1.EndpointSubset) []PodAddress {
-	var servers []PodAddress
+func parseSubset(subsets []corev1.EndpointSubset) []NetAddress {
+	var servers []NetAddress
 	for _, subset := range subsets {
-
 		if len(subset.Ports) == 0 { // no port continue next
 			break
 		}
-		var ports []PodPort
-		for _, p := range subset.Ports {
-			if p.Port > 0 {
-				ports = append(ports, PodPort{
-					Name: p.Name,
-					Port: p.Port,
-				})
-			}
-		}
-
 		for _, addr := range subset.Addresses {
 			if addr.TargetRef != nil && addr.TargetRef.Kind == "Pod" {
-				pod := PodAddress{
-					Host:  addr.TargetRef.Name,
-					IP:    addr.IP,
-					Ports: ports,
+				pod := NetAddress{
+					Host: addr.TargetRef.Name,
+					IP:   addr.IP,
+					Type: "Pod",
 				}
 				servers = append(servers, pod)
 			}

@@ -16,16 +16,30 @@ import (
 )
 
 type Watcher struct {
-	client       kubernetes.Interface
-	EndpointCtrl *EndpointCtroller
-	ServiceCtrl  *ServiceCtroller
-	readyCount   int32
-	onFinish     func()
+	client        kubernetes.Interface
+	EndpointCtrl  *EndpointCtroller
+	ServiceCtrl   *ServiceCtroller
+	IpCtrl        *IpAddressCtroller
+	MockCtrl      *MockCtroller
+	ServiceAdd    chan NetAddress
+	ServiceRemove chan NetAddress
+	readyCount    int32
+	onFinish      func()
 }
 
 func NewWatcher(c *config.Configuration, onChange func()) *Watcher {
 	var config = &rest.Config{}
 	var err error
+	if !c.EnableK8S {
+		w := &Watcher{
+			onFinish:      onChange,
+			ServiceAdd:    make(chan NetAddress, 10),
+			ServiceRemove: make(chan NetAddress, 10),
+		}
+		w.MockCtrl = &MockCtroller{w: w}
+		return w
+	}
+
 	if c.IsInK8S {
 		config, err = rest.InClusterConfig()
 		if err != nil {
@@ -43,16 +57,27 @@ func NewWatcher(c *config.Configuration, onChange func()) *Watcher {
 		panic(err.Error())
 	}
 
-	return &Watcher{
-		client:       client,
-		onFinish:     onChange,
-		EndpointCtrl: &EndpointCtroller{Endpoints: make(map[string]*EndpointInfo)},
-		ServiceCtrl:  &ServiceCtroller{Services: make(map[string]*ServiceInfo)},
+	w := &Watcher{
+		client:        client,
+		onFinish:      onChange,
+		ServiceAdd:    make(chan NetAddress, 10),
+		ServiceRemove: make(chan NetAddress, 10),
 	}
-
+	w.EndpointCtrl = &EndpointCtroller{w: w, Endpoints: make(map[string]*EndpointInfo)}
+	w.ServiceCtrl = &ServiceCtroller{w: w, Services: make(map[string]*ServiceInfo)}
+	w.IpCtrl = &IpAddressCtroller{w: w, Ips: make(map[string]*NetAddress)}
+	return w
 }
 
 func (w *Watcher) Run() {
+
+	if w.client == nil {
+		if w.MockCtrl != nil {
+			w.MockCtrl.StartMock()
+		}
+		w.onFinish()
+		return
+	}
 
 	var endOnce sync.Once
 	var svcOnce sync.Once

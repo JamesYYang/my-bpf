@@ -3,6 +3,7 @@ package modules
 import (
 	"encoding/binary"
 	"log"
+	"my-bpf/k8s"
 	"net"
 	"unsafe"
 
@@ -11,6 +12,7 @@ import (
 
 type DNS_Msg_Handler struct {
 	name string
+	m    *ebpf.Map
 }
 
 type DNSQuery struct {
@@ -41,23 +43,52 @@ func (h *DNS_Msg_Handler) Name() string {
 	return h.name
 }
 
-func (h *DNS_Msg_Handler) SetupKernelMap(m *ebpf.Map) error {
-	// get service from k8s informer
-	baiduQuery := DNSQuery{
+func (h *DNS_Msg_Handler) SetupKernelMap(m *ebpf.Map, sd chan k8s.NetAddress, sr chan k8s.NetAddress) error {
+	h.m = m
+	go func(sd chan k8s.NetAddress, sr chan k8s.NetAddress) {
+		for {
+			select {
+			case na := <-sd:
+				h.UpdateDNSMap(na, false)
+			case na := <-sr:
+				h.UpdateDNSMap(na, true)
+			}
+		}
+	}(sd, sr)
+	return nil
+}
+
+func (h *DNS_Msg_Handler) UpdateDNSMap(addr k8s.NetAddress, isDelete bool) {
+	qk := getKey(addr.Host)
+	if isDelete {
+		log.Printf("remove DNS[%s]", addr.Host)
+		err := h.m.Delete(qk)
+		if err != nil {
+			log.Printf("Remove DNS[%s] map failed, error: %v", addr.Host, err)
+		}
+	} else {
+		record := DNSRecord{
+			IP:  binary.LittleEndian.Uint32(net.ParseIP(addr.IP).To4()),
+			TTL: 30,
+		}
+		log.Printf("Add DNS[%s] IP[%s]", addr.Host, addr.IP)
+		err := h.m.Put(unsafe.Pointer(&qk), unsafe.Pointer(&record))
+		if err != nil {
+			log.Printf("Add DNS[%s] map failed, error: %v", addr.Host, err)
+		}
+	}
+}
+
+func getKey(host string) DNSQuery {
+	queryKey := DNSQuery{
 		RecordType: 1,
 		Class:      1,
 	}
 	nameSlice := make([]byte, 256)
-	copy(nameSlice, []byte("www.baidu.com"))
+	copy(nameSlice, []byte(host))
 	dnsName := replace_dots_with_length_octets(nameSlice)
-	copy(baiduQuery.Name[:], dnsName)
-	baiduRecord := DNSRecord{
-		IP:  binary.LittleEndian.Uint32(net.ParseIP("10.16.75.24").To4()),
-		TTL: 30,
-	}
-	log.Printf("will update dns record: %s", baiduQuery.Name[:])
-	err := m.Put(unsafe.Pointer(&baiduQuery), unsafe.Pointer(&baiduRecord))
-	return err
+	copy(queryKey.Name[:], dnsName)
+	return queryKey
 }
 
 func (h *DNS_Msg_Handler) Decode(b []byte) ([]byte, error) {

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"my-bpf/k8s"
 
 	"github.com/cilium/ebpf"
 	"golang.org/x/sys/unix"
@@ -23,7 +24,7 @@ func (h *TcpReset_Msg_Handler) Name() string {
 	return h.name
 }
 
-func (h *TcpReset_Msg_Handler) SetupKernelMap(m *ebpf.Map) error {
+func (h *TcpReset_Msg_Handler) SetupKernelMap(m *ebpf.Map, sd chan k8s.NetAddress, sr chan k8s.NetAddress) error {
 	panic("tcp reset probe not need update kernel map")
 }
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"my-bpf/k8s"
 
 	"github.com/cilium/ebpf"
 	"golang.org/x/sys/unix"
@@ -19,7 +20,7 @@ func init() {
 	RegisterMsgHandler(h)
 }
 
-func (h *Connect_Msg_Handler) SetupKernelMap(m *ebpf.Map) error {
+func (h *Connect_Msg_Handler) SetupKernelMap(m *ebpf.Map, sd chan k8s.NetAddress, sr chan k8s.NetAddress) error {
 	panic("Connect probe not need update kernel map")
 }
 

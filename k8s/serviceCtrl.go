@@ -6,27 +6,20 @@ import (
 	"sync"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type (
 	ServiceCtroller struct {
 		sync.RWMutex
+		w        *Watcher
 		Services map[string]*ServiceInfo
 	}
 
 	ServiceInfo struct {
-		sync.Mutex
 		Name            string
 		Namespace       string
 		ResourceVersion string
-		Ports           []ServicePortInfo
-	}
-
-	ServicePortInfo struct {
-		Name       string
-		Port       int32
-		TargetPort intstr.IntOrString
+		Address         []NetAddress
 	}
 )
 
@@ -40,35 +33,34 @@ func (s *ServiceCtroller) ServiceChanged(svc *corev1.Service, isDelete bool) {
 	s.Lock()
 	defer s.Unlock()
 
+	svcIP := svc.Spec.ClusterIP
+	s.w.IpCtrl.RemoveEndpoint(old.Address)
+
 	if isDelete {
 		log.Printf("service removed: [%s.%s]\n", svc.Name, svc.Namespace)
 		delete(s.Services, key)
 	} else {
-		var newPorts []ServicePortInfo
-		for _, svcPort := range svc.Spec.Ports {
-			pInfo := ServicePortInfo{
-				Name:       svcPort.Name,
-				Port:       svcPort.Port,
-				TargetPort: svcPort.TargetPort,
-			}
-			newPorts = append(newPorts, pInfo)
+		newAddress := []NetAddress{}
+		addr := NetAddress{
+			Host: key,
+			IP:   svcIP,
+			Type: "Service",
 		}
+		newAddress = append(newAddress, addr)
 		if !ok {
-			if len(newPorts) == 0 {
-				return
-			}
 			log.Printf("service add: [%s.%s]\n", svc.Name, svc.Namespace)
 			// log.Printf("port info: %+v", newPorts)
 			s.Services[key] = &ServiceInfo{
 				Name:            svc.Name,
 				Namespace:       svc.Namespace,
 				ResourceVersion: svc.ResourceVersion,
-				Ports:           newPorts,
+				Address:         newAddress,
 			}
 		} else {
 			log.Printf("service changed: [%s.%s]\n", svc.Name, svc.Namespace)
 			old.ResourceVersion = svc.ResourceVersion
-			old.Ports = newPorts
+			old.Address = newAddress
 		}
+		s.w.IpCtrl.AddEndpoint(newAddress)
 	}
 }
