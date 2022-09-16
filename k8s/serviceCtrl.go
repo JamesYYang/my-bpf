@@ -34,7 +34,9 @@ func (s *ServiceCtroller) ServiceChanged(svc *corev1.Service, isDelete bool) {
 	defer s.Unlock()
 
 	svcIP := svc.Spec.ClusterIP
-	s.w.IpCtrl.RemoveEndpoint(old.Address)
+	if ok {
+		s.w.IpCtrl.RemoveEndpoint(old.Address)
+	}
 
 	if isDelete {
 		log.Printf("service removed: [%s.%s]\n", svc.Name, svc.Namespace)

@@ -67,8 +67,13 @@ func (h *DNS_Msg_Handler) UpdateDNSMap(addr k8s.NetAddress, isDelete bool) {
 			log.Printf("Remove DNS[%s] map failed, error: %v", addr.Host, err)
 		}
 	} else {
+		ip := net.ParseIP(addr.IP)
+		if ip == nil {
+			log.Printf("Parse DNS[%s] IP[%s] failed", addr.Host, addr.IP)
+			return
+		}
 		record := DNSRecord{
-			IP:  binary.LittleEndian.Uint32(net.ParseIP(addr.IP).To4()),
+			IP:  binary.LittleEndian.Uint32(ip.To4()),
 			TTL: 30,
 		}
 		log.Printf("Add DNS[%s] IP[%s]", addr.Host, addr.IP)

@@ -47,7 +47,7 @@ func NewWatcher(c *config.Configuration, onChange func()) *Watcher {
 		}
 	} else {
 		// for local test, out of k8s
-		config, err = clientcmd.BuildConfigFromFlags("", "conf/kube.yaml")
+		config, err = clientcmd.BuildConfigFromFlags("", "config/kube.yaml")
 		if err != nil {
 			panic(err.Error())
 		}
