@@ -28,7 +28,7 @@ func RegisterMsgHandler(h IMsgHandler) {
 func NewMessage() *BPFMessage {
 	msg := &BPFMessage{}
 	msg.Host_Name, _ = os.Hostname()
-	msg.Host_IP = GetLocalIP()
+	msg.Host_IP, _ = GetLocalIP()
 
 	return msg
 }

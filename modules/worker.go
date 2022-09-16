@@ -87,6 +87,10 @@ func (w *Woker) setupTCManager() {
 				log.Printf("add tc hook to net interface: %s", i.Name)
 			}
 		} else {
+			ifname := p.Ifname
+			if ifname == "" {
+				_, ifname = GetLocalIP()
+			}
 			probe := &manager.Probe{
 				//show filter
 				//tc filter show dev eth0 ingress(egress)
@@ -95,14 +99,14 @@ func (w *Woker) setupTCManager() {
 				UID:              p.UID,
 				Section:          p.Section,
 				EbpfFuncName:     p.EbpfFuncName,
-				Ifname:           p.Ifname,
+				Ifname:           ifname,
 				NetworkDirection: manager.Ingress,
 			}
 			if p.NetworkDirection == "Egress" {
 				probe.NetworkDirection = manager.Egress
 			}
 			w.bpfManager.Probes = append(w.bpfManager.Probes, probe)
-			log.Printf("add tc hook to net interface: %s", p.Ifname)
+			log.Printf("add tc hook to net interface: %s", ifname)
 		}
 	}
 

@@ -1,6 +1,6 @@
 ExtBTF: 
-EnableK8S: false
-IsInK8S: false
+EnableK8S: true
+IsInK8S: true
 WokerConfig:
   EBPFSysExecve: 
     PerfMapSize: 3
@@ -29,7 +29,7 @@ WokerConfig:
   EBPFTCPConnectProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_connect.o
-    Enable: true
+    Enable: false
     EbpfType: Trace
     Probes:
       - UID: MBPFTCPConnectProbe
@@ -71,7 +71,7 @@ WokerConfig:
       - UID: MBPFXDPProbe
         Section: classifier/egress
         EbpfFuncName: tc_dns_func
-        Ifname: ens33
+        Ifname:
         NetworkDirection: Egress
     MapToKernel: dns_a_records
     MsgHandler: mh_tc_dns
@@ -84,12 +84,12 @@ WokerConfig:
       - UID: MBPFTCProbeIngress
         Section: classifier/ingress
         EbpfFuncName: ingress_cls_func
-        Ifname: ens33
+        Ifname:
         NetworkDirection: Ingress
       - UID: MBPFTCProbeEgress
         Section: classifier/egress
         EbpfFuncName: egress_cls_func
-        Ifname: ens33
+        Ifname:
         NetworkDirection: Egress
     MapName: tc_capture_events
     MsgHandler: mh_tc_capture

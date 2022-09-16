@@ -20,23 +20,25 @@ func inet_btoa(in []byte) string {
 }
 
 var localIP = ""
+var localIFace = ""
 
-func GetLocalIP() string {
+func GetLocalIP() (string, string) {
 	if localIP != "" {
-		return localIP
+		return localIP, localIFace
 	}
-	addrs, err := getLocalNetAddrs()
+	addrs, iface, err := getLocalNetAddrs()
 	if err != nil {
 		log.Printf("get local ip addr error: %s", err)
 	}
+	localIFace = iface
 	localIP = addrs
-	return localIP
+	return localIP, iface
 }
 
-func getLocalNetAddrs() (string, error) {
+func getLocalNetAddrs() (string, string, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	for _, iface := range ifaces {
 		if iface.Flags&net.FlagUp == 0 {
@@ -58,7 +60,7 @@ func getLocalNetAddrs() (string, error) {
 
 		addrs, err := iface.Addrs()
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 
 		for _, addr := range addrs {
@@ -82,11 +84,11 @@ func getLocalNetAddrs() (string, error) {
 
 			ipStr := ip.String()
 			if isIntranet(ipStr) {
-				return ipStr, nil
+				return ipStr, iface.Name, nil
 			}
 		}
 	}
-	return "", nil
+	return "", "", nil
 }
 
 func isIntranet(ipStr string) bool {

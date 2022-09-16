@@ -16,6 +16,8 @@ COPY ./ebpf /dist/ebpf
 
 COPY ./modules /dist/modules
 
+COPY ./k8s /dist/k8s
+
 COPY ./go.mod /dist/
 
 COPY ./go.sum /dist/
