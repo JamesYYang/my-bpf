@@ -16,6 +16,7 @@
 
 #define memset(dest, chr, n) __builtin_memset((dest), (chr), (n))
 #define memcpy(dest, src, n) __builtin_memcpy((dest), (src), (n))
+#define ctx_ptr(field)		(void *)(long)(field)
 
 #define AF_INET 2
 #define AF_INET6 10
@@ -115,6 +116,13 @@ struct dns_query
 {
   uint16_t record_type;
   uint16_t class;
+  char name[MAX_DNS_NAME_LENGTH];
+};
+
+struct dns_event
+{
+  u64 ts;
+  u8 is_matched;
   char name[MAX_DNS_NAME_LENGTH];
 };
 

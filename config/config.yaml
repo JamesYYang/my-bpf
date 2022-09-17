@@ -74,6 +74,7 @@ WokerConfig:
         Ifname:
         NetworkDirection: Egress
     MapToKernel: dns_a_records
+    MapName: dns_capture_events
     MsgHandler: mh_tc_dns
   EBPFTCProbe: 
     PerfMapSize: 1

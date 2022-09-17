@@ -1,13 +1,16 @@
 package modules
 
 import (
+	"bytes"
 	"encoding/binary"
+	"fmt"
 	"log"
 	"my-bpf/k8s"
 	"net"
 	"unsafe"
 
 	"github.com/cilium/ebpf"
+	"golang.org/x/sys/unix"
 )
 
 type DNS_Msg_Handler struct {
@@ -97,5 +100,21 @@ func getKey(host string) DNSQuery {
 }
 
 func (h *DNS_Msg_Handler) Decode(b []byte) ([]byte, error) {
-	panic("DNS probe not have event")
+	// Parse the ringbuf event entry into a bpfEvent structure.
+	var event Net_DNS_Event
+	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
+		return nil, err
+	}
+
+	// jsonMsg, err := json.MarshalIndent(msg, "", "\t")
+	// if err != nil {
+	// 	log.Printf("log mesaage failed: %s", err.Error())
+	// }
+
+	// return jsonMsg, nil
+	strMsg := fmt.Sprintf("[DNS] [%s] (Match: %d, Spend: %d)",
+		unix.ByteSliceToString(replace_length_octets_with_dots(event.Name[:])),
+		event.IsMatch, event.TS)
+
+	return []byte(strMsg), nil
 }

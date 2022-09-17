@@ -35,11 +35,6 @@ struct
 	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
 } tcp_connect_events SEC(".maps");
 
-struct
-{
-	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
-} tcp_kconnect_events SEC(".maps");
-
 static __always_inline char *get_task_uts_name(struct task_struct *task)
 {
   struct nsproxy *np = READ_KERN(task->nsproxy);

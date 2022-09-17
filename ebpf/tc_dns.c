@@ -18,6 +18,12 @@ struct
   __uint(max_entries, 65536);
 } dns_a_records SEC(".maps");
 
+/* BPF perfbuf map */
+struct
+{
+	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
+} dns_capture_events SEC(".maps");
+
 // 一个 struct event 变量的大小超过了 512 字节，无法放到 BPF 栈上，
 // 因此声明一个 size=1 的 per-CPU array 来存放 event 变量
 struct
@@ -27,6 +33,14 @@ struct
   __type(key, int);
   __type(value, struct dns_heap);
 } heap SEC(".maps");
+
+struct
+{
+  __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY); // per-cpu array
+  __uint(max_entries, 1);
+  __type(key, int);
+  __type(value, struct dns_event);
+} eventheap SEC(".maps");
 
 // Parse query and return query length
 static inline int parse_query(struct __sk_buff *ctx, void *query_start, struct dns_query *q)
@@ -148,25 +162,16 @@ static inline int create_ar_response(struct ar_hdr *ar, char *dns_buffer, size_t
 
 static int match_a_records(struct dns_query *q, struct a_record *a)
 {
-  bpf_printk("DNS record type: %i", q->record_type);
-  bpf_printk("DNS class: %i", q->class);
-  bpf_printk("DNS name: %s", q->name);
-
   struct a_record *record;
 
   record = bpf_map_lookup_elem(&dns_a_records, q);
   // If record pointer is not zero..
   if (record > 0)
   {
-    bpf_printk("DNS query matched");
-    bpf_printk("DNS IP: %i", record->ip_addr);
-    bpf_printk("DNS TTL: %i", record->ttl);
-
     a->ip_addr = record->ip_addr;
     a->ttl = record->ttl;
     return 0;
   }
-  bpf_printk("DNS query failed");
   return -1;
   
 }
@@ -184,8 +189,15 @@ int tc_dns_func(struct __sk_buff *ctx)
     return 0;
   }
 
-  void *data_end = (void *)(unsigned long)ctx->data_end;
-  void *data = (void *)(unsigned long)ctx->data;
+  struct dns_event *dns_e;
+  dns_e = bpf_map_lookup_elem(&eventheap, &zero);
+  if (!dns_e) /* can't happen */
+  {
+    return 0;
+  }
+
+  void *data_end = ctx_ptr(ctx->data_end);
+  void *data = ctx_ptr(ctx->data);
   // Boundary check: check if packet is larger than a full ethernet + ip header
   if (data + ETH_HLEN + IP_HLEN > data_end)
   {
@@ -237,12 +249,11 @@ int tc_dns_func(struct __sk_buff *ctx)
         struct a_record a_record;
 
         int res = match_a_records(&q, &a_record);
-
         if (res < 0)
         {
           return TC_ACT_OK;
         }
-
+        memcpy(dns_e->name, q.name, sizeof(dns_e->name));
         // Change DNS header to a valid response header
         modify_dns_header_response(dns_hdr);
 
@@ -268,14 +279,14 @@ int tc_dns_func(struct __sk_buff *ctx)
         // // Adjust packet length accordingly
         if (bpf_skb_change_tail(ctx, tailadjust, 0) < 0)
         {
-          bpf_printk("Adjust tail fail");
+          return TC_ACT_OK;
         }
         else
         {
           // Because we adjusted packet length, mem addresses might be changed.
           // Reinit pointers, as verifier will complain otherwise.
-          data = (void *)(unsigned long)ctx->data;
-          data_end = (void *)(unsigned long)ctx->data_end;
+          data = ctx_ptr(ctx->data);
+          data_end = ctx_ptr(ctx->data_end);
 
           // Copy bytes from our temporary buffer to packet buffer
           int aOffset = ETH_HLEN + IP_HLEN + UDP_HLEN + DNS_HLEN + query_length;
@@ -298,10 +309,10 @@ int tc_dns_func(struct __sk_buff *ctx)
           swap_upd_port(ctx);
 
           uint64_t end = bpf_ktime_get_ns();
-          uint64_t elapsed = end - start;
-          bpf_printk("Time elapsed: %d", elapsed);
+          dns_e->ts = end - start;
+          dns_e->is_matched = 1;
+          bpf_perf_event_output(ctx, &dns_capture_events, BPF_F_CURRENT_CPU, dns_e, sizeof(*dns_e));
 
-          // bpf_perf_event_output(ctx, &tc_dns_events, BPF_F_CURRENT_CPU, &q, sizeof(q));
           // Redirecting the modified skb on the same interface to be transmitted again
           return bpf_redirect(ctx->ifindex, BPF_F_INGRESS);
         }
