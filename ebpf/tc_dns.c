@@ -21,7 +21,7 @@ struct
 /* BPF perfbuf map */
 struct
 {
-	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
+  __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
 } dns_capture_events SEC(".maps");
 
 // 一个 struct event 变量的大小超过了 512 字节，无法放到 BPF 栈上，
@@ -55,7 +55,7 @@ static inline int parse_query(struct __sk_buff *ctx, void *query_start, struct d
   // Fill record_type and class with default values to satisfy verifier
   q->record_type = 0;
   q->class = 0;
-  
+
   // We create a bounded loop of MAX_DNS_NAME_LENGTH (maximum allowed dns name size).
   // We'll loop through the packet byte by byte until we reach '0' in order to get the dns query name
   for (i = 0; i < MAX_DNS_NAME_LENGTH; i++)
@@ -173,7 +173,6 @@ static int match_a_records(struct dns_query *q, struct a_record *a)
     return 0;
   }
   return -1;
-  
 }
 // egress_cls_func is called for packets that are going out of the network
 SEC("classifier/egress")
@@ -243,17 +242,21 @@ int tc_dns_func(struct __sk_buff *ctx)
         {
           return TC_ACT_OK;
         }
-
+        dns_e->r_type = q.record_type;
+        memcpy(dns_e->name, q.name, sizeof(dns_e->name));
         size_t buf_size = 0;
         // Check if query matches a record in our hash table
         struct a_record a_record;
-
         int res = match_a_records(&q, &a_record);
         if (res < 0)
         {
+          uint64_t end = bpf_ktime_get_ns();
+          dns_e->ts = end - start;
+          dns_e->is_matched = 0;
+          bpf_perf_event_output(ctx, &dns_capture_events, BPF_F_CURRENT_CPU, dns_e, sizeof(*dns_e));
           return TC_ACT_OK;
         }
-        memcpy(dns_e->name, q.name, sizeof(dns_e->name));
+
         // Change DNS header to a valid response header
         modify_dns_header_response(dns_hdr);
 

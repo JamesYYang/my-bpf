@@ -122,6 +122,7 @@ struct dns_query
 struct dns_event
 {
   u64 ts;
+  u16 r_type;
   u8 is_matched;
   char name[MAX_DNS_NAME_LENGTH];
 };

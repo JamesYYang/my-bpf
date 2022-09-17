@@ -76,9 +76,10 @@ type Net_Packet_Event struct {
 }
 
 type Net_DNS_Event struct {
-	TS      uint64
-	IsMatch uint8
-	Name    [256]byte
+	TS         uint64
+	RecordType uint16
+	IsMatch    uint8
+	Name       [256]byte
 }
 
 const (

@@ -112,9 +112,9 @@ func (h *DNS_Msg_Handler) Decode(b []byte) ([]byte, error) {
 	// }
 
 	// return jsonMsg, nil
-	strMsg := fmt.Sprintf("[DNS] [%s] (Match: %d, Spend: %d)",
+	strMsg := fmt.Sprintf("[DNS] [%s] (Type: %d, Match: %d, Spend: %d)",
 		unix.ByteSliceToString(replace_length_octets_with_dots(event.Name[:])),
-		event.IsMatch, event.TS)
+		event.RecordType, event.IsMatch, event.TS)
 
 	return []byte(strMsg), nil
 }
