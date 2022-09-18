@@ -36,7 +36,9 @@ func NewWatcher(c *config.Configuration, onChange func()) *Watcher {
 			ServiceAdd:    make(chan NetAddress, 10),
 			ServiceRemove: make(chan NetAddress, 10),
 		}
-		w.MockCtrl = &MockCtroller{w: w}
+		if c.IsMockService {
+			w.MockCtrl = &MockCtroller{w: w}
+		}
 		return w
 	}
 

@@ -21,17 +21,6 @@
 #define AF_INET 2
 #define AF_INET6 10
 
-struct sys_probe_event
-{
-  u64 ts;
-  u32 pid;
-  u32 tgid;
-  u32 ppid;
-  char comm[16];
-  char filename[256];
-  char uts_name[65];
-};
-
 #define MAX_PERCPU_BUFSIZE 10240
 #define MAX_STR_ARR_ELEM 40
 #define MAX_STRING_SIZE 4096
@@ -45,31 +34,23 @@ struct sys_probe_event
 #define ETH_P_IP 0x0800 /* Internet Protocol packet        */
 #define MAX_DNS_NAME_LENGTH 256
 
-struct sys_execve_event
+struct task_base_info
 {
-  u64 ts;
   u32 pid;
   u32 tgid;
   u32 ppid;
   char comm[16];
-  u32 buf_off;
-  char filename[256];
-  char uts_name[65];
-  char args[MAX_PERCPU_BUFSIZE];
+  char uts_name[64];
 };
 
 struct net_sock_event
 {
-  u64 ts;
   u32 pid;
-  u32 tgid;
-  u32 ppid;
   char comm[16];
   u32 sip;   //源IP
   u32 dip;   //目的IP
   u16 sport; //源端口
   u16 dport; //目的端口
-  char uts_name[65];
 };
 
 struct net_packet_event
@@ -204,4 +185,23 @@ static inline void changeLength(struct __sk_buff *skb, uint16_t iplen, uint16_t 
   bpf_l3_csum_replace(skb, IP_CHK_OFF, old_iplen, iplen, sizeof(iplen));
   bpf_skb_store_bytes(skb, ETH_HLEN + offsetof(struct iphdr, tot_len), &iplen, sizeof(iplen), 0);
   bpf_skb_store_bytes(skb, ETH_HLEN + IP_HLEN + offsetof(struct udphdr, len), &udplen, sizeof(udplen), 0);
+}
+
+static inline void get_task_info(void *t)
+{
+  struct task_base_info *base_info = (struct task_base_info *)t;
+  struct task_struct *task = (struct task_struct *)bpf_get_current_task();
+  base_info->pid = READ_KERN(task->pid);
+	base_info->tgid = READ_KERN(task->tgid);
+	base_info->ppid = READ_KERN(READ_KERN(task->real_parent)->pid);
+	bpf_get_current_comm(base_info->comm, sizeof(base_info->comm));
+
+	struct nsproxy *np = READ_KERN(task->nsproxy);
+	struct uts_namespace *uts_ns = READ_KERN(np->uts_ns);
+	char *uts_name = READ_KERN(uts_ns->name.nodename);
+  if (uts_name)
+  {
+    memset(&base_info->uts_name[0], 0, sizeof(base_info->uts_name));
+    bpf_probe_read_str(base_info->uts_name, sizeof(base_info->uts_name), uts_name);
+  }
 }

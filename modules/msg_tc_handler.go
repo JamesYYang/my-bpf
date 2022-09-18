@@ -34,8 +34,7 @@ func (h *Tc_Msg_Handler) Decode(b []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	msg := NewMessage()
-	msg.TS = event.TS
+	msg := NewNetMessage()
 	msg.Event = TC_Package
 	action := "receive"
 	if !event.IsIngress {

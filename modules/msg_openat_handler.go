@@ -31,11 +31,11 @@ func (h *Openat_Msg_Handler) SetupKernelMap(m *ebpf.Map, sd chan k8s.NetAddress,
 
 func (h *Openat_Msg_Handler) Decode(b []byte) ([]byte, error) {
 	// Parse the ringbuf event entry into a bpfEvent structure.
-	var event Sys_Event
+	var event Sys_Openat_Event
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
 		return nil, err
 	}
-	msg := NewMessage()
+	msg := NewSysMessage()
 	msg.FillEventBase(event.Probe_Event_Base)
 	msg.Event = SYS_Openat
 	msg.Filename = unix.ByteSliceToString(event.Filename[:])

@@ -7,10 +7,7 @@
 
 struct net_tcp_event
 {
-  u64 ts;
   u32 pid;
-  u32 tgid;
-  u32 ppid;
   char comm[16];
   char saddr[16];
   char daddr[16];
@@ -19,7 +16,6 @@ struct net_tcp_event
   u16 family;
   u16 oldstate;
   u16 newstate;
-  char uts_name[65];
 };
 
 /* BPF ringbuf map */
@@ -32,15 +28,8 @@ struct net_tcp_event
 /* BPF perfbuf map */
 struct
 {
-	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
+  __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
 } tcp_connect_events SEC(".maps");
-
-static __always_inline char *get_task_uts_name(struct task_struct *task)
-{
-  struct nsproxy *np = READ_KERN(task->nsproxy);
-  struct uts_namespace *uts_ns = READ_KERN(np->uts_ns);
-  return READ_KERN(uts_ns->name.nodename);
-}
 
 /*
  * inet_sock_set_state tracepoint format.
@@ -62,17 +51,8 @@ int tracepoint_inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *c
     // {
     //   return 0;
     // }
-
-    struct task_struct *task = (struct task_struct *)bpf_get_current_task();
-    data->ts = bpf_ktime_get_ns();
-    data->pid = READ_KERN(task->pid);
-    data->tgid = READ_KERN(task->tgid);
-    data->ppid = READ_KERN(READ_KERN(task->real_parent)->pid);
+    data->pid = bpf_get_current_pid_tgid() >> 32;
     bpf_get_current_comm(data->comm, sizeof(data->comm));
-
-    char *uts_name = get_task_uts_name(task);
-    if (uts_name)
-      bpf_probe_read_str(data->uts_name, sizeof(data->uts_name), uts_name);
 
     data->family = family;
     data->newstate = ctx->newstate;

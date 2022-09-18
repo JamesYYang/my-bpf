@@ -34,12 +34,12 @@ func (h *Execve_Msg_Handler) Decode(b []byte) ([]byte, error) {
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
 		return nil, err
 	}
-	msg := NewMessage()
+	msg := NewSysMessage()
 	msg.Event = SYS_Execve
 	msg.FillEventBase(event.Probe_Event_Base)
 	msg.Filename = unix.ByteSliceToString(event.Filename[:])
-	msg.UtsName = unix.ByteSliceToString(event.UtsName[:])
-	msg.Filename += " " + string(bytes.ReplaceAll(event.Args[:event.BufSize], []byte{0}, []byte{' '}))
+	msg.Filename += " " + string(bytes.ReplaceAll(event.Args[:event.BuffSize], []byte{0}, []byte{' '}))
+	// msg.Filename += " " + unix.ByteSliceToString(event.Args[:])
 	jsonMsg, err := json.MarshalIndent(msg, "", "\t")
 	if err != nil {
 		log.Printf("log mesaage failed: %s", err.Error())

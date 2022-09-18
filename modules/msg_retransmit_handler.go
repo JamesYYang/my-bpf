@@ -7,7 +7,6 @@ import (
 	"my-bpf/k8s"
 
 	"github.com/cilium/ebpf"
-	"golang.org/x/sys/unix"
 )
 
 type TcpRetrans_Msg_Handler struct {
@@ -34,14 +33,13 @@ func (h *TcpRetrans_Msg_Handler) Decode(b []byte) ([]byte, error) {
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
 		return nil, err
 	}
-	msg := NewMessage()
-	msg.FillEventBase(event.Probe_Event_Base)
+	msg := NewNetMessage()
+	msg.FillEventBase(event.Net_Event_Base)
 	msg.Event = NET_Retrans
 	msg.NET_SourceIP = inet_ntoa(event.Sip)
 	msg.NET_SourcePort = int(event.Sport)
 	msg.NET_DestIP = inet_ntoa(event.Dip)
 	msg.NET_DestPort = int(event.Dport)
-	msg.UtsName = unix.ByteSliceToString(event.UtsName[:])
 
 	// jsonMsg, err := json.MarshalIndent(msg, "", "\t")
 	// if err != nil {

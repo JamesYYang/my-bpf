@@ -3,6 +3,28 @@
 #include "helper.h"
 #include "bpf_tracing.h"
 
+struct sys_execve_event
+{
+	u32 pid;
+	u32 tgid;
+	u32 ppid;
+	char comm[16];
+	char uts_name[64];
+	char filename[256];
+	u32 buf_off;
+	char args[MAX_PERCPU_BUFSIZE];
+};
+
+// 一个 struct event 变量的大小超过了 512 字节，无法放到 BPF 栈上，
+// 因此声明一个 size=1 的 per-CPU array 来存放 event 变量
+struct
+{
+	__uint(type, BPF_MAP_TYPE_PERCPU_ARRAY); // per-cpu array
+	__uint(max_entries, 1);
+	__type(key, int);
+	__type(value, struct sys_execve_event);
+} heap SEC(".maps");
+
 /* BPF ringbuf map */
 // struct
 // {
@@ -16,23 +38,6 @@ struct
 	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
 } sys_enter_execve_events SEC(".maps");
 
-// 一个 struct event 变量的大小超过了 512 字节，无法放到 BPF 栈上，
-// 因此声明一个 size=1 的 per-CPU array 来存放 event 变量
-struct
-{
-	__uint(type, BPF_MAP_TYPE_PERCPU_ARRAY); // per-cpu array
-	__uint(max_entries, 1);
-	__type(key, int);
-	__type(value, struct sys_execve_event);
-} heap SEC(".maps");
-
-static __always_inline char *get_task_uts_name(struct task_struct *task)
-{
-	struct nsproxy *np = READ_KERN(task->nsproxy);
-	struct uts_namespace *uts_ns = READ_KERN(np->uts_ns);
-	return READ_KERN(uts_ns->name.nodename);
-}
-
 SEC("tracepoint/syscalls/sys_enter_execve")
 int tracepoint_sys_enter_execve(struct trace_event_raw_sys_enter *ctx)
 {
@@ -43,24 +48,10 @@ int tracepoint_sys_enter_execve(struct trace_event_raw_sys_enter *ctx)
 	{
 		return 0;
 	}
-	// struct sys_execve_event *e;
-	// e = bpf_ringbuf_reserve(&sys_enter_execve_events, sizeof(*e), 0);
-	// if (!e)
-	// {
-	// 	return 0;
-	// }
-  e->ts = bpf_ktime_get_ns();
-	struct task_struct *task = (struct task_struct *)bpf_get_current_task();
-	e->pid = READ_KERN(task->pid);
-	e->tgid = READ_KERN(task->tgid);
-	e->ppid = READ_KERN(READ_KERN(task->real_parent)->pid);
-	bpf_get_current_comm(e->comm, sizeof(e->comm));
 
+	get_task_info(e);
+	memset(&e->filename[0], 0, sizeof(e->filename));
 	bpf_probe_read_user_str(e->filename, sizeof(e->filename), (char *)(ctx->args[0]));
-
-	char *uts_name = get_task_uts_name(task);
-	if (uts_name)
-		bpf_probe_read_str(e->uts_name, sizeof(e->uts_name), uts_name);
 
 	char **args = (char **)(ctx->args[1]);
 	e->buf_off = 0;
@@ -87,9 +78,9 @@ int tracepoint_sys_enter_execve(struct trace_event_raw_sys_enter *ctx)
 		}
 	}
 
-	bpf_perf_event_output(ctx, &sys_enter_execve_events, BPF_F_CURRENT_CPU, e, sizeof(*e));
-	// bpf_ringbuf_submit(e, 0);
+	bpf_printk("args: %s", e->args);
 
+	bpf_perf_event_output(ctx, &sys_enter_execve_events, BPF_F_CURRENT_CPU, e, sizeof(*e));
 	return 0;
 }
 

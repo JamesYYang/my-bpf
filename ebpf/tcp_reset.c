@@ -46,17 +46,8 @@ int kp_tcp_v4_send_reset(struct pt_regs *ctx)
   //   return 0;
   // }
 
-  struct task_struct *task = (struct task_struct *)bpf_get_current_task();
-  data->ts = bpf_ktime_get_ns();
-  data->pid = READ_KERN(task->pid);
-  data->tgid = READ_KERN(task->tgid);
-  data->ppid = READ_KERN(READ_KERN(task->real_parent)->pid);
+  data->pid = bpf_get_current_pid_tgid() >> 32;
   bpf_get_current_comm(data->comm, sizeof(data->comm));
-
-  char *uts_name = get_task_uts_name(task);
-  if (uts_name)
-    bpf_probe_read_str(data->uts_name, sizeof(data->uts_name), uts_name);
-
   struct sk_buff *skb = (struct sk_buff *)PT_REGS_PARM2(ctx);
   struct tcphdr *tcp = (struct tcphdr *)skb_transport_header(skb);
   struct iphdr *ip = (struct iphdr *)skb_network_header(skb);

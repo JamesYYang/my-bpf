@@ -7,7 +7,6 @@ import (
 	"my-bpf/k8s"
 
 	"github.com/cilium/ebpf"
-	"golang.org/x/sys/unix"
 )
 
 type TcpReset_Msg_Handler struct {
@@ -35,14 +34,13 @@ func (h *TcpReset_Msg_Handler) Decode(b []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	msg := NewMessage()
-	msg.FillEventBase(event.Probe_Event_Base)
+	msg := NewNetMessage()
+	msg.FillEventBase(event.Net_Event_Base)
 	msg.Event = NET_Rest
 	msg.NET_SourceIP = inet_ntoa(event.Dip)
 	msg.NET_SourcePort = int(event.Dport)
 	msg.NET_DestIP = inet_ntoa(event.Sip)
 	msg.NET_DestPort = int(event.Sport)
-	msg.UtsName = unix.ByteSliceToString(event.UtsName[:])
 
 	// jsonMsg, err := json.MarshalIndent(msg, "", "\t")
 	// if err != nil {

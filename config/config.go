@@ -28,10 +28,11 @@ type (
 	}
 
 	Configuration struct {
-		ExtBTF      string                         `yaml:"ExtBTF"`
-		EnableK8S   bool                           `yaml:"EnableK8S"`
-		IsInK8S     bool                           `yaml:"IsInK8S"`
-		WokerConfig map[string]WorkerConfiguration `yaml:"WokerConfig"`
+		ExtBTF        string                         `yaml:"ExtBTF"`
+		EnableK8S     bool                           `yaml:"EnableK8S"`
+		IsInK8S       bool                           `yaml:"IsInK8S"`
+		IsMockService bool                           `yaml:"IsMockService"`
+		WokerConfig   map[string]WorkerConfiguration `yaml:"WokerConfig"`
 	}
 )
 

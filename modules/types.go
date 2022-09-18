@@ -1,24 +1,22 @@
 package modules
 
 type Probe_Event_Base struct {
-	TS   uint64
-	Pid  uint32
-	Tgid uint32
-	Ppid uint32
-	Comm [16]byte
+	Pid     uint32
+	Tgid    uint32
+	Ppid    uint32
+	Comm    [16]byte
+	UtsName [64]byte
 }
 
-type Sys_Event struct {
+type Sys_Openat_Event struct {
 	Probe_Event_Base
 	Filename [256]byte
-	UtsName  [65]byte
 }
 
 type Sys_Execve_Event struct {
 	Probe_Event_Base
-	BufSize  uint32
 	Filename [256]byte
-	UtsName  [65]byte
+	BuffSize uint32
 	Args     [10240]byte
 }
 
@@ -43,8 +41,13 @@ const (
 	MAP_RING = "RING"
 )
 
+type Net_Event_Base struct {
+	Pid  uint32
+	Comm [16]byte
+}
+
 type Net_Tcp_Event struct {
-	Probe_Event_Base
+	Net_Event_Base
 	Saddr    [16]byte
 	Daddr    [16]byte
 	Sport    uint16
@@ -52,20 +55,17 @@ type Net_Tcp_Event struct {
 	Family   uint16
 	Oldstate uint16
 	Newstate uint16
-	UtsName  [65]byte
 }
 
 type Net_Socket_Event struct {
-	Probe_Event_Base
-	Sip     uint32
-	Dip     uint32
-	Sport   uint16
-	Dport   uint16
-	UtsName [65]byte
+	Net_Event_Base
+	Sip   uint32
+	Dip   uint32
+	Sport uint16
+	Dport uint16
 }
 
 type Net_Packet_Event struct {
-	TS        uint64
 	Len       uint32
 	Ifindex   uint32
 	Sip       uint32
@@ -100,19 +100,28 @@ const (
 	EBPF_XDP    = "XDP"
 )
 
-type BPFMessage struct {
-	TS             uint64 `json:"TS"`
+type BPFSysMessage struct {
+	Host_Name string `json:"Host_Name"`
+	UtsName   string `json:"UtsName"`
+	Host_IP   string `json:"Host_IP"`
+	Event     string `json:"Event"`
+	Pid       int    `json:"Pid"`
+	Tgid      int    `json:"Tgid"`
+	Ppid      int    `json:"Ppid"`
+	Comm      string `json:"Comm"`
+	Filename  string `json:"Filename"`
+}
+
+type BPFNetMessage struct {
 	Host_Name      string `json:"Host_Name"`
-	UtsName        string `json:"UtsName"`
 	Host_IP        string `json:"Host_IP"`
 	Event          string `json:"Event"`
 	Pid            int    `json:"Pid"`
-	Tgid           int    `json:"Tgid"`
-	Ppid           int    `json:"Ppid"`
 	Comm           string `json:"Comm"`
-	Filename       string `json:"Filename"`
 	NET_SourceIP   string `json:"NET_SourceIP"`
+	NET_Source     string `json:"NET_Source"`
 	NET_SourcePort int    `json:"NET_SourcePort"`
 	NET_DestIP     string `json:"NET_DestIP"`
+	NET_Dest       string `json:"NET_Dest"`
 	NET_DestPort   int    `json:"NET_DestPort"`
 }

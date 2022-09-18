@@ -25,18 +25,29 @@ func RegisterMsgHandler(h IMsgHandler) {
 	}
 }
 
-func NewMessage() *BPFMessage {
-	msg := &BPFMessage{}
+func NewSysMessage() *BPFSysMessage {
+	msg := &BPFSysMessage{}
 	msg.Host_Name, _ = os.Hostname()
 	msg.Host_IP, _ = GetLocalIP()
-
 	return msg
 }
 
-func (msg *BPFMessage) FillEventBase(eb Probe_Event_Base) {
-	msg.TS = eb.TS
+func NewNetMessage() *BPFNetMessage {
+	msg := &BPFNetMessage{}
+	msg.Host_Name, _ = os.Hostname()
+	msg.Host_IP, _ = GetLocalIP()
+	return msg
+}
+
+func (msg *BPFSysMessage) FillEventBase(eb Probe_Event_Base) {
 	msg.Pid = int(eb.Pid)
 	msg.Tgid = int(eb.Tgid)
 	msg.Ppid = int(eb.Ppid)
+	msg.Comm = unix.ByteSliceToString(eb.Comm[:])
+	msg.UtsName = unix.ByteSliceToString(eb.UtsName[:])
+}
+
+func (msg *BPFNetMessage) FillEventBase(eb Net_Event_Base) {
+	msg.Pid = int(eb.Pid)
 	msg.Comm = unix.ByteSliceToString(eb.Comm[:])
 }
