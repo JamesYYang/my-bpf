@@ -77,8 +77,7 @@ int tracepoint_sys_enter_execve(struct trace_event_raw_sys_enter *ctx)
 			break;
 		}
 	}
-
-	bpf_printk("args: %s", e->args);
+	// bpf_printk("args: %s", e->args);
 
 	bpf_perf_event_output(ctx, &sys_enter_execve_events, BPF_F_CURRENT_CPU, e, sizeof(*e));
 	return 0;

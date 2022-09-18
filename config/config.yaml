@@ -6,7 +6,7 @@ WokerConfig:
   EBPFSysExecve: 
     PerfMapSize: 3
     Asset: ebpf/bin/sys_execve.o
-    Enable: true
+    Enable: false
     EbpfType: Trace
     Probes:
       - UID: MBPFSysExecveProbe
@@ -30,7 +30,7 @@ WokerConfig:
   EBPFTCPConnectProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_connect.o
-    Enable: false
+    Enable: true
     EbpfType: Trace
     Probes:
       - UID: MBPFTCPConnectProbe

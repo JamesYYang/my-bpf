@@ -29,11 +29,6 @@ int kp_tcp_retransmit_skb(struct pt_regs *ctx)
   {
     struct net_sock_event t = {};
     struct net_sock_event *data = &t;
-    // data = bpf_ringbuf_reserve(&tcp_retrans_events, sizeof(*data), 0);
-    // if (!data)
-    // {
-    //   return 0;
-    // }
 
     data->pid = bpf_get_current_pid_tgid() >> 32;
     bpf_get_current_comm(data->comm, sizeof(data->comm));

@@ -46,11 +46,7 @@ int tracepoint_inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *c
   {
     struct net_tcp_event t = {};
     struct net_tcp_event *data = &t;
-    // data = bpf_ringbuf_reserve(&tcp_connect_events, sizeof(*data), 0);
-    // if (!data)
-    // {
-    //   return 0;
-    // }
+    
     data->pid = bpf_get_current_pid_tgid() >> 32;
     bpf_get_current_comm(data->comm, sizeof(data->comm));
 

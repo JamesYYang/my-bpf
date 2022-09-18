@@ -36,10 +36,10 @@ func (h *Connect_Msg_Handler) Decode(b []byte) ([]byte, error) {
 	if event.Oldstate == TCP_SYN_RECV && event.Newstate == TCP_ESTABLISHED {
 		msg.FillEventBase(event.Net_Event_Base)
 		msg.Event = NET_Accept
-		msg.NET_SourceIP = inet_btoa(event.Daddr[:4])
-		msg.NET_SourcePort = int(event.Dport)
-		msg.NET_DestIP = inet_btoa(event.Saddr[:4])
-		msg.NET_DestPort = int(event.Sport)
+		msg.NET_DestIP = inet_btoa(event.Daddr[:4])
+		msg.NET_DestPort = int(event.Dport)
+		msg.NET_SourceIP = inet_btoa(event.Saddr[:4])
+		msg.NET_SourcePort = int(event.Sport)
 	} else if event.Oldstate == TCP_CLOSE && event.Newstate == TCP_SYN_SENT {
 		msg.FillEventBase(event.Net_Event_Base)
 		msg.Event = NET_Connect
