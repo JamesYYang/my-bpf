@@ -3,7 +3,8 @@ package modules
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
+	"encoding/json"
+	"log"
 	"my-bpf/k8s"
 
 	"github.com/cilium/ebpf"
@@ -54,15 +55,15 @@ func (h *Connect_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 		msg.NET_Dest = addr.Host
 	}
 
-	// jsonMsg, err := json.MarshalIndent(msg, "", "\t")
-	// if err != nil {
-	// 	log.Printf("log mesaage failed: %s", err.Error())
-	// }
+	jsonMsg, err := json.Marshal(msg)
+	if err != nil {
+		log.Printf("log mesaage failed: %s", err.Error())
+	}
 
-	// return jsonMsg, nil
+	return jsonMsg, nil
 
-	strMsg := fmt.Sprintf("[%s] [(%s) %s:%d] -> [(%s) %s:%d]", msg.Event,
-		msg.NET_Source, msg.NET_SourceIP, msg.NET_SourcePort,
-		msg.NET_Dest, msg.NET_DestIP, msg.NET_DestPort)
-	return []byte(strMsg), nil
+	// strMsg := fmt.Sprintf("[%s] [(%s) %s:%d] -> [(%s) %s:%d]", msg.Event,
+	// 	msg.NET_Source, msg.NET_SourceIP, msg.NET_SourcePort,
+	// 	msg.NET_Dest, msg.NET_DestIP, msg.NET_DestPort)
+	// return []byte(strMsg), nil
 }

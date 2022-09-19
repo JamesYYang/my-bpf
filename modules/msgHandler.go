@@ -27,6 +27,7 @@ func RegisterMsgHandler(h IMsgHandler) {
 
 func NewSysMessage() *BPFSysMessage {
 	msg := &BPFSysMessage{}
+	msg.TS = GetTimestamp()
 	msg.Host_Name, _ = os.Hostname()
 	msg.Host_IP, _ = GetLocalIP()
 	return msg
@@ -34,6 +35,7 @@ func NewSysMessage() *BPFSysMessage {
 
 func NewNetMessage() *BPFNetMessage {
 	msg := &BPFNetMessage{}
+	msg.TS = GetTimestamp()
 	msg.Host_Name, _ = os.Hostname()
 	msg.Host_IP, _ = GetLocalIP()
 	return msg

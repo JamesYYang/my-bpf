@@ -101,6 +101,7 @@ const (
 )
 
 type BPFSysMessage struct {
+	TS        int64  `json:"TS"`
 	Host_Name string `json:"Host_Name"`
 	UtsName   string `json:"UtsName"`
 	Host_IP   string `json:"Host_IP"`
@@ -113,6 +114,7 @@ type BPFSysMessage struct {
 }
 
 type BPFNetMessage struct {
+	TS             int64  `json:"TS"`
 	Host_Name      string `json:"Host_Name"`
 	Host_IP        string `json:"Host_IP"`
 	Event          string `json:"Event"`

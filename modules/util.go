@@ -6,6 +6,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func inet_ntoa(in uint32) string {
@@ -17,6 +18,10 @@ func inet_ntoa(in uint32) string {
 func inet_btoa(in []byte) string {
 	ip := net.IP(in)
 	return ip.String()
+}
+
+func GetTimestamp() int64 {
+	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
 var localIP = ""
