@@ -296,7 +296,7 @@ func (w *Woker) Decode(b []byte) {
 	if err != nil {
 		log.Printf("decode error:%v", err)
 	} else if msg != nil {
-		log.Println(string(msg))
+		w.wd.eventHandler.POSTMessage(msg)
 	}
 }
 

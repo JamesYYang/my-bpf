@@ -33,6 +33,9 @@ type (
 		IsInK8S             bool                           `yaml:"IsInK8S"`
 		IsMockService       bool                           `yaml:"IsMockService"`
 		NotifyServiceChange bool                           `yaml:"NotifyServiceChange"`
+		EventOutput         string                         `yaml:"EventOutput"`
+		KafkaAddr           string                         `yaml:"KafkaAddr"`
+		KafkaTopic          string                         `yaml:"KafkaTopic"`
 		WokerConfig         map[string]WorkerConfiguration `yaml:"WokerConfig"`
 	}
 )

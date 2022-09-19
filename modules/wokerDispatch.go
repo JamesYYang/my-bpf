@@ -7,9 +7,10 @@ import (
 )
 
 type WokerDispatch struct {
-	Wokers     []*Woker
-	BPFConfig  *config.Configuration
-	K8SWatcher *k8s.Watcher
+	Wokers       []*Woker
+	BPFConfig    *config.Configuration
+	K8SWatcher   *k8s.Watcher
+	eventHandler *EventHandler
 }
 
 func NewWorkerDispatch() (*WokerDispatch, error) {
@@ -20,6 +21,7 @@ func NewWorkerDispatch() (*WokerDispatch, error) {
 	}
 	wd := &WokerDispatch{}
 	wd.BPFConfig = bpfConfig
+	wd.eventHandler = NewEventHandler(bpfConfig)
 	return wd, nil
 }
 

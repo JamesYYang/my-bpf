@@ -3,6 +3,9 @@ EnableK8S: false
 IsInK8S: false
 IsMockService: true
 NotifyServiceChange: false
+EventOutput: Console
+KafkaAddr: 1.1.1.1:8920,2.2.2.2:8920
+KafkaTopic: mbpf_event
 WokerConfig:
   EBPFSysExecve: 
     PerfMapSize: 3
