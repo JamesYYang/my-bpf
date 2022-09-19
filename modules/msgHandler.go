@@ -11,8 +11,8 @@ import (
 
 type IMsgHandler interface {
 	Name() string
-	Decode(b []byte) ([]byte, error)
-	SetupKernelMap(m *ebpf.Map, sd chan k8s.NetAddress, sr chan k8s.NetAddress) error
+	Decode(b []byte, w *k8s.Watcher) ([]byte, error)
+	SetupKernelMap(m *ebpf.Map, w *k8s.Watcher) error
 }
 
 var msgHandlers = make(map[string]IMsgHandler)

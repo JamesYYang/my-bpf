@@ -30,44 +30,43 @@ type Watcher struct {
 func NewWatcher(c *config.Configuration, onChange func()) *Watcher {
 	var config = &rest.Config{}
 	var err error
-	if !c.EnableK8S {
-		w := &Watcher{
-			onFinish:      onChange,
-			ServiceAdd:    make(chan NetAddress, 10),
-			ServiceRemove: make(chan NetAddress, 10),
-		}
-		if c.IsMockService {
-			w.MockCtrl = &MockCtroller{w: w}
-		}
-		return w
-	}
-
-	if c.IsInK8S {
-		config, err = rest.InClusterConfig()
-		if err != nil {
-			panic(err.Error())
-		}
-	} else {
-		// for local test, out of k8s
-		config, err = clientcmd.BuildConfigFromFlags("", "config/kube.yaml")
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-	client, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
 
 	w := &Watcher{
-		client:        client,
-		onFinish:      onChange,
-		ServiceAdd:    make(chan NetAddress, 10),
-		ServiceRemove: make(chan NetAddress, 10),
+		onFinish: onChange,
 	}
 	w.EndpointCtrl = &EndpointCtroller{w: w, Endpoints: make(map[string]*EndpointInfo)}
 	w.ServiceCtrl = &ServiceCtroller{w: w, Services: make(map[string]*ServiceInfo)}
 	w.IpCtrl = &IpAddressCtroller{w: w, Ips: make(map[string]*NetAddress)}
+
+	if c.EnableK8S {
+		if c.IsInK8S {
+			config, err = rest.InClusterConfig()
+			if err != nil {
+				panic(err.Error())
+			}
+		} else {
+			// for local test, out of k8s
+			config, err = clientcmd.BuildConfigFromFlags("", "config/kube.yaml")
+			if err != nil {
+				panic(err.Error())
+			}
+		}
+		client, err := kubernetes.NewForConfig(config)
+		if err != nil {
+			panic(err.Error())
+		}
+		w.client = client
+	} else {
+		if c.IsMockService {
+			w.MockCtrl = &MockCtroller{w: w}
+		}
+	}
+
+	if c.NotifyServiceChange {
+		w.ServiceAdd = make(chan NetAddress, 10)
+		w.ServiceRemove = make(chan NetAddress, 10)
+	}
+
 	return w
 }
 

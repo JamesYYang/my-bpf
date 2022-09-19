@@ -11,16 +11,16 @@ type IpAddressCtroller struct {
 }
 
 type NetAddress struct {
-	Host string
-	IP   string
-	Type string
+	Host string `yaml:"Host"`
+	IP   string `yaml:"IP"`
+	Type string `yaml:"Type"`
 }
 
 func (ipc *IpAddressCtroller) RemoveEndpoint(addr []NetAddress) {
 	ipc.Lock()
 	defer ipc.Unlock()
 	for _, a := range addr {
-		if a.Type == "Service" {
+		if a.Type == "Service" && ipc.w.ServiceRemove != nil {
 			ipc.w.ServiceRemove <- a
 		}
 		delete(ipc.Ips, a.IP)
@@ -31,7 +31,7 @@ func (ipc *IpAddressCtroller) AddEndpoint(addr []NetAddress) {
 	ipc.Lock()
 	defer ipc.Unlock()
 	for _, a := range addr {
-		if a.Type == "Service" {
+		if a.Type == "Service" && ipc.w.ServiceAdd != nil {
 			ipc.w.ServiceAdd <- a
 		}
 		ipc.Ips[a.IP] = &NetAddress{

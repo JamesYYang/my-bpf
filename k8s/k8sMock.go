@@ -1,8 +1,16 @@
 package k8s
 
 import (
+	"log"
+	"os"
 	"time"
+
+	"gopkg.in/yaml.v2"
 )
+
+type MockService struct {
+	EndpointList []NetAddress `yaml:"EndpointList"`
+}
 
 type MockCtroller struct {
 	w *Watcher
@@ -13,22 +21,22 @@ func (mc *MockCtroller) StartMock() {
 }
 
 func (mc *MockCtroller) doMock() {
-	// log.Printf("Worker [%s] start", w.Rules.HealthRuleId)
-	time.Sleep(time.Duration(5 * time.Second))
-	ticker := time.NewTicker(5 * time.Second)
+	fname := "config/mock.yaml"
 
-	for mc.do() {
-		<-ticker.C
+	ms := &MockService{}
+	data, err := os.ReadFile(fname)
+	if err != nil {
+		log.Printf("read mock file error: %v", err)
+		return
 	}
-}
-
-func (mc *MockCtroller) do() bool {
-	addr := NetAddress{
-		Host: "www.baidu.com",
-		IP:   "10.16.75.24",
-		Type: "Service",
+	if err = yaml.Unmarshal(data, ms); err != nil {
+		log.Printf("read mock file error: %v", err)
+		return
 	}
 
-	mc.w.ServiceAdd <- addr
-	return true
+	for _, e := range ms.EndpointList {
+		log.Printf("endpoint add: [%s -- %s]\n", e.Host, e.IP)
+		mc.w.IpCtrl.AddEndpoint([]NetAddress{e})
+		time.Sleep(5 * time.Second)
+	}
 }

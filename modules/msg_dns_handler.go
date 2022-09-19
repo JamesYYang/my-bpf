@@ -46,7 +46,7 @@ func (h *DNS_Msg_Handler) Name() string {
 	return h.name
 }
 
-func (h *DNS_Msg_Handler) SetupKernelMap(m *ebpf.Map, sd chan k8s.NetAddress, sr chan k8s.NetAddress) error {
+func (h *DNS_Msg_Handler) SetupKernelMap(m *ebpf.Map, w *k8s.Watcher) error {
 	h.m = m
 	go func(sd chan k8s.NetAddress, sr chan k8s.NetAddress) {
 		for {
@@ -57,7 +57,7 @@ func (h *DNS_Msg_Handler) SetupKernelMap(m *ebpf.Map, sd chan k8s.NetAddress, sr
 				h.UpdateDNSMap(na, true)
 			}
 		}
-	}(sd, sr)
+	}(w.ServiceAdd, w.ServiceRemove)
 	return nil
 }
 
@@ -99,7 +99,7 @@ func getKey(host string) DNSQuery {
 	return queryKey
 }
 
-func (h *DNS_Msg_Handler) Decode(b []byte) ([]byte, error) {
+func (h *DNS_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 	// Parse the ringbuf event entry into a bpfEvent structure.
 	var event Net_DNS_Event
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {

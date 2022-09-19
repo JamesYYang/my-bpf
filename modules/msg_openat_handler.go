@@ -25,11 +25,11 @@ func (h *Openat_Msg_Handler) Name() string {
 	return h.name
 }
 
-func (h *Openat_Msg_Handler) SetupKernelMap(m *ebpf.Map, sd chan k8s.NetAddress, sr chan k8s.NetAddress) error {
+func (h *Openat_Msg_Handler) SetupKernelMap(m *ebpf.Map, w *k8s.Watcher) error {
 	panic("sys openat probe not need update kernel map")
 }
 
-func (h *Openat_Msg_Handler) Decode(b []byte) ([]byte, error) {
+func (h *Openat_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 	// Parse the ringbuf event entry into a bpfEvent structure.
 	var event Sys_Openat_Event
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {

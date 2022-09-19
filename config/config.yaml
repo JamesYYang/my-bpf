@@ -1,7 +1,8 @@
 ExtBTF: 
 EnableK8S: false
 IsInK8S: false
-IsMockService: false
+IsMockService: true
+NotifyServiceChange: false
 WokerConfig:
   EBPFSysExecve: 
     PerfMapSize: 3
@@ -42,7 +43,7 @@ WokerConfig:
   EBPFTCPRetransProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_retrans.o
-    Enable: false
+    Enable: true
     EbpfType: Kprobe
     Probes:
       - UID: MBPFTCPRetransProbe
@@ -54,7 +55,7 @@ WokerConfig:
   EBPFTCPRSTProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_reset.o
-    Enable: false
+    Enable: true
     EbpfType: Kprobe
     Probes:
       - UID: MBPFTCPRSTProbe

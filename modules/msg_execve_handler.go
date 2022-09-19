@@ -25,11 +25,11 @@ func (h *Execve_Msg_Handler) Name() string {
 	return h.name
 }
 
-func (h *Execve_Msg_Handler) SetupKernelMap(m *ebpf.Map, sd chan k8s.NetAddress, sr chan k8s.NetAddress) error {
+func (h *Execve_Msg_Handler) SetupKernelMap(m *ebpf.Map, w *k8s.Watcher) error {
 	panic("sys execve probe not need update kernel map")
 }
 
-func (h *Execve_Msg_Handler) Decode(b []byte) ([]byte, error) {
+func (h *Execve_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 	var event Sys_Execve_Event
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
 		return nil, err

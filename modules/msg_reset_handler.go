@@ -23,11 +23,11 @@ func (h *TcpReset_Msg_Handler) Name() string {
 	return h.name
 }
 
-func (h *TcpReset_Msg_Handler) SetupKernelMap(m *ebpf.Map, sd chan k8s.NetAddress, sr chan k8s.NetAddress) error {
+func (h *TcpReset_Msg_Handler) SetupKernelMap(m *ebpf.Map, w *k8s.Watcher) error {
 	panic("tcp reset probe not need update kernel map")
 }
 
-func (h *TcpReset_Msg_Handler) Decode(b []byte) ([]byte, error) {
+func (h *TcpReset_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 	// Parse the ringbuf event entry into a bpfEvent structure.
 	var event Net_Socket_Event
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
@@ -41,6 +41,12 @@ func (h *TcpReset_Msg_Handler) Decode(b []byte) ([]byte, error) {
 	msg.NET_SourcePort = int(event.Dport)
 	msg.NET_DestIP = inet_ntoa(event.Sip)
 	msg.NET_DestPort = int(event.Sport)
+	if addr, ok := w.IpCtrl.GetEndpointByIP(msg.NET_SourceIP); ok {
+		msg.NET_Source = addr.Host
+	}
+	if addr, ok := w.IpCtrl.GetEndpointByIP(msg.NET_DestIP); ok {
+		msg.NET_Dest = addr.Host
+	}
 
 	// jsonMsg, err := json.MarshalIndent(msg, "", "\t")
 	// if err != nil {
@@ -49,8 +55,8 @@ func (h *TcpReset_Msg_Handler) Decode(b []byte) ([]byte, error) {
 
 	// return jsonMsg, nil
 
-	strMsg := fmt.Sprintf("[%s] [%s:%d] -> [%s:%d]", msg.Event,
-		msg.NET_SourceIP, msg.NET_SourcePort,
-		msg.NET_DestIP, msg.NET_DestPort)
+	strMsg := fmt.Sprintf("[%s] [(%s) %s:%d] -> [(%s) %s:%d]", msg.Event,
+		msg.NET_Source, msg.NET_SourceIP, msg.NET_SourcePort,
+		msg.NET_Dest, msg.NET_DestIP, msg.NET_DestPort)
 	return []byte(strMsg), nil
 }

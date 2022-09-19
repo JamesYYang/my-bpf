@@ -177,7 +177,7 @@ func (w *Woker) setupKernelMap() error {
 	if !found {
 		return errors.New(fmt.Sprintf("cant found map:%s", w.config.MapToKernel))
 	}
-	err = w.msgHandler.SetupKernelMap(em, w.wd.K8SWatcher.ServiceAdd, w.wd.K8SWatcher.ServiceRemove)
+	err = w.msgHandler.SetupKernelMap(em, w.wd.K8SWatcher)
 	if err != nil {
 		return err
 	}
@@ -292,7 +292,7 @@ func (w *Woker) ringbufEventReader(errChan chan error, em *ebpf.Map) {
 }
 
 func (w *Woker) Decode(b []byte) {
-	msg, err := w.msgHandler.Decode(b)
+	msg, err := w.msgHandler.Decode(b, w.wd.K8SWatcher)
 	if err != nil {
 		log.Printf("decode error:%v", err)
 	} else if msg != nil {
