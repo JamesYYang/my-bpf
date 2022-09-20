@@ -41,6 +41,8 @@ func (kh *KafkaHandler) Init(c *config.Configuration) {
 	config := sarama.NewConfig()
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Partitioner = sarama.NewRandomPartitioner
+	config.Producer.Return.Successes = true
+	config.Producer.Return.Errors = true
 	config.Producer.Timeout = time.Second * 5
 	kh.KafkaClient, err = sarama.NewSyncProducer(strings.Split(c.KafkaAddr, ","), config)
 	if err != nil {
