@@ -3,8 +3,8 @@ EnableK8S: false
 IsInK8S: false
 IsMockService: true
 NotifyServiceChange: false
-EventOutput: Console
-KafkaAddr: 1.1.1.1:8920,2.2.2.2:8920
+EventOutput: Kafka
+KafkaAddr: 172.16.171.78:9092,172.16.171.79:9092,172.16.171.80:9092
 KafkaTopic: mbpf_event
 KafkaBatchSize: 10
 WokerConfig:
