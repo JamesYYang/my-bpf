@@ -53,7 +53,7 @@ func (kh *KafkaHandler) Init(c *config.Configuration) {
 	if err != nil {
 		log.Printf("init kafka client error: %v", err)
 	}
-	kh.Msgs = make([]*sarama.ProducerMessage, kh.BatchSize)
+	kh.Msgs = make([]*sarama.ProducerMessage, 0, kh.BatchSize)
 }
 
 func (kh *KafkaHandler) POSTMessage(b []byte) {
@@ -68,7 +68,7 @@ func (kh *KafkaHandler) POSTMessage(b []byte) {
 	kh.Msgs = append(kh.Msgs, msg)
 	if len(kh.Msgs) >= kh.BatchSize {
 		needPush := kh.Msgs[:]
-		kh.Msgs = make([]*sarama.ProducerMessage, kh.BatchSize)
+		kh.Msgs = make([]*sarama.ProducerMessage, 0, kh.BatchSize)
 		kh.Unlock()
 		err := kh.KafkaClient.SendMessages(needPush)
 		if err != nil {
