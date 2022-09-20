@@ -6,6 +6,7 @@ NotifyServiceChange: false
 EventOutput: Console
 KafkaAddr: 1.1.1.1:8920,2.2.2.2:8920
 KafkaTopic: mbpf_event
+KafkaBatchSize: 10
 WokerConfig:
   EBPFSysExecve: 
     PerfMapSize: 3

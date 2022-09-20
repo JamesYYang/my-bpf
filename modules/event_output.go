@@ -4,6 +4,7 @@ import (
 	"log"
 	"my-bpf/config"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Shopify/sarama"
@@ -29,8 +30,11 @@ func (ch *ConsoleHandler) POSTMessage(b []byte) {
 }
 
 type KafkaHandler struct {
+	sync.Mutex
 	KafkaAddr   string
 	KafkaTopic  string
+	BatchSize   int
+	Msgs        []*sarama.ProducerMessage
 	KafkaClient sarama.SyncProducer
 }
 
@@ -38,6 +42,7 @@ func (kh *KafkaHandler) Init(c *config.Configuration) {
 	var err error
 	kh.KafkaAddr = c.KafkaAddr
 	kh.KafkaTopic = c.KafkaTopic
+	kh.BatchSize = c.KafkaBatchSize
 	config := sarama.NewConfig()
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Partitioner = sarama.NewRandomPartitioner
@@ -48,6 +53,7 @@ func (kh *KafkaHandler) Init(c *config.Configuration) {
 	if err != nil {
 		log.Printf("init kafka client error: %v", err)
 	}
+	kh.Msgs = make([]*sarama.ProducerMessage, kh.BatchSize)
 }
 
 func (kh *KafkaHandler) POSTMessage(b []byte) {
@@ -58,7 +64,20 @@ func (kh *KafkaHandler) POSTMessage(b []byte) {
 		Topic: kh.KafkaTopic,
 		Value: sarama.ByteEncoder(b),
 	}
-	kh.KafkaClient.SendMessage(msg)
+	kh.Lock()
+	kh.Msgs = append(kh.Msgs, msg)
+	if len(kh.Msgs) >= kh.BatchSize {
+		needPush := kh.Msgs[:]
+		kh.Msgs = make([]*sarama.ProducerMessage, kh.BatchSize)
+		kh.Unlock()
+		err := kh.KafkaClient.SendMessages(needPush)
+		if err != nil {
+			log.Printf("send event to kafka failed: %v", err)
+		}
+	} else {
+		kh.Unlock()
+	}
+
 }
 
 func NewEventHandler(c *config.Configuration) *EventHandler {

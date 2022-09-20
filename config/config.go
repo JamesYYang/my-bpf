@@ -35,6 +35,7 @@ type (
 		NotifyServiceChange bool                           `yaml:"NotifyServiceChange"`
 		EventOutput         string                         `yaml:"EventOutput"`
 		KafkaAddr           string                         `yaml:"KafkaAddr"`
+		KafkaBatchSize      int                            `yaml:"KafkaBatchSize"`
 		KafkaTopic          string                         `yaml:"KafkaTopic"`
 		WokerConfig         map[string]WorkerConfiguration `yaml:"WokerConfig"`
 	}
