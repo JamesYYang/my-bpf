@@ -14,3 +14,5 @@ EndpointList:
   - Host: james-windows
     IP: 192.168.146.1
     Type: Service
+    Svc: test-service
+    NS: hello

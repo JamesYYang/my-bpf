@@ -60,9 +60,13 @@ func (h *Connect_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 	msg.NET_SourcePort = int(event.Sport)
 	if addr, ok := w.IpCtrl.GetEndpointByIP(msg.NET_SourceIP); ok {
 		msg.NET_Source = addr.Host
+		msg.NET_SourceSvc = addr.Svc
+		msg.NET_SourceNS = addr.NS
 	}
 	if addr, ok := w.IpCtrl.GetEndpointByIP(msg.NET_DestIP); ok {
 		msg.NET_Dest = addr.Host
+		msg.NET_DestSvc = addr.Svc
+		msg.NET_DestNS = addr.NS
 	}
 
 	jsonMsg, err := json.Marshal(msg)

@@ -47,6 +47,8 @@ func (s *ServiceCtroller) ServiceChanged(svc *corev1.Service, isDelete bool) {
 			Host: key,
 			IP:   svcIP,
 			Type: "Service",
+			Svc:  svc.Name,
+			NS:   svc.Namespace,
 		}
 		newAddress = append(newAddress, addr)
 		if !ok {

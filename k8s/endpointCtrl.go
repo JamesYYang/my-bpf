@@ -40,7 +40,7 @@ func (e *EndpointCtroller) EndpointChanged(endPoint *corev1.Endpoints, isDelete 
 		log.Printf("endpoint removed: [%s.%s]\n", endPoint.Name, endPoint.Namespace)
 		delete(e.Endpoints, key)
 	} else {
-		newAddress := parseSubset(endPoint.Subsets)
+		newAddress := parseSubset(endPoint.Subsets, endPoint.Name, endPoint.Namespace)
 		if !ok {
 			if len(newAddress) == 0 { //do not add empty address
 				return
@@ -62,7 +62,7 @@ func (e *EndpointCtroller) EndpointChanged(endPoint *corev1.Endpoints, isDelete 
 	}
 }
 
-func parseSubset(subsets []corev1.EndpointSubset) []NetAddress {
+func parseSubset(subsets []corev1.EndpointSubset, svc string, ns string) []NetAddress {
 	var servers []NetAddress
 	for _, subset := range subsets {
 		if len(subset.Ports) == 0 { // no port continue next
@@ -74,6 +74,8 @@ func parseSubset(subsets []corev1.EndpointSubset) []NetAddress {
 					Host: addr.TargetRef.Name,
 					IP:   addr.IP,
 					Type: "Pod",
+					Svc:  svc,
+					NS:   ns,
 				}
 				servers = append(servers, pod)
 			}

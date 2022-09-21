@@ -15,6 +15,8 @@ type NetAddress struct {
 	Host string `yaml:"Host"`
 	IP   string `yaml:"IP"`
 	Type string `yaml:"Type"`
+	Svc  string `yaml:"Svc"`
+	NS   string `yaml:"NS"`
 }
 
 func (ipc *IpAddressCtroller) RemoveEndpoint(addr []NetAddress) {
@@ -39,6 +41,8 @@ func (ipc *IpAddressCtroller) AddEndpoint(addr []NetAddress) {
 			Host: a.Host,
 			IP:   a.IP,
 			Type: a.Type,
+			Svc:  a.Svc,
+			NS:   a.NS,
 		}
 	}
 }

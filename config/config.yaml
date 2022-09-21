@@ -1,7 +1,7 @@
 ExtBTF: 
 EnableK8S: false
 IsInK8S: false
-IsMockService: true
+IsMockService: false
 NotifyServiceChange: false
 EventOutput: Kafka
 KafkaAddr: 172.16.171.78:9092,172.16.171.79:9092,172.16.171.80:9092

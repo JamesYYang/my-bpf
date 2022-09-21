@@ -122,8 +122,12 @@ type BPFNetMessage struct {
 	Comm           string `json:"Comm"`
 	NET_SourceIP   string `json:"NET_SourceIP"`
 	NET_Source     string `json:"NET_Source"`
+	NET_SourceSvc  string `json:"NET_SourceSvc"`
+	NET_SourceNS   string `json:"NET_SourceNS"`
 	NET_SourcePort int    `json:"NET_SourcePort"`
 	NET_DestIP     string `json:"NET_DestIP"`
 	NET_Dest       string `json:"NET_Dest"`
+	NET_DestSvc    string `json:"NET_DestSvc"`
+	NET_DestNS     string `json:"NET_DestNS"`
 	NET_DestPort   int    `json:"NET_DestPort"`
 }
