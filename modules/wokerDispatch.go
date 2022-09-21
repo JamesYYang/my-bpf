@@ -34,6 +34,7 @@ func (wd *WokerDispatch) InitWorkers() {
 			w.config = c
 			w.extBTF = wd.BPFConfig.ExtBTF
 			w.msgHandler = msgHandlers[c.MsgHandler]
+			w.msgHandler.SetupMsgFilter(wd.BPFConfig)
 			wd.Wokers = append(wd.Wokers, w)
 		}
 	}

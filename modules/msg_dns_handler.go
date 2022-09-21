@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
+	"my-bpf/config"
 	"my-bpf/k8s"
 	"net"
 	"unsafe"
@@ -44,6 +45,9 @@ func init() {
 
 func (h *DNS_Msg_Handler) Name() string {
 	return h.name
+}
+
+func (h *DNS_Msg_Handler) SetupMsgFilter(c *config.Configuration) {
 }
 
 func (h *DNS_Msg_Handler) SetupKernelMap(m *ebpf.Map, w *k8s.Watcher) error {

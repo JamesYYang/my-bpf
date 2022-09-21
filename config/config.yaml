@@ -7,6 +7,9 @@ EventOutput: Kafka
 KafkaAddr: 172.16.171.78:9092,172.16.171.79:9092,172.16.171.80:9092
 KafkaTopic: mbpf_event
 KafkaBatchSize: 10
+ExcludeComm:
+  - kubelet
+  - zabbix_agentd
 WokerConfig:
   EBPFSysExecve: 
     PerfMapSize: 3

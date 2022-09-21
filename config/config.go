@@ -37,6 +37,7 @@ type (
 		KafkaAddr           string                         `yaml:"KafkaAddr"`
 		KafkaBatchSize      int                            `yaml:"KafkaBatchSize"`
 		KafkaTopic          string                         `yaml:"KafkaTopic"`
+		ExcludeComm         []string                       `yaml:"ExcludeComm"`
 		WokerConfig         map[string]WorkerConfiguration `yaml:"WokerConfig"`
 	}
 )

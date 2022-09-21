@@ -5,13 +5,15 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"log"
+	"my-bpf/config"
 	"my-bpf/k8s"
 
 	"github.com/cilium/ebpf"
 )
 
 type TcpReset_Msg_Handler struct {
-	name string
+	name        string
+	excludeComm map[string]bool
 }
 
 func init() {
@@ -22,6 +24,10 @@ func init() {
 
 func (h *TcpReset_Msg_Handler) Name() string {
 	return h.name
+}
+
+func (h *TcpReset_Msg_Handler) SetupMsgFilter(c *config.Configuration) {
+	h.excludeComm = ParseExcludeComm(c)
 }
 
 func (h *TcpReset_Msg_Handler) SetupKernelMap(m *ebpf.Map, w *k8s.Watcher) error {
@@ -47,6 +53,10 @@ func (h *TcpReset_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) 
 	}
 	if addr, ok := w.IpCtrl.GetEndpointByIP(msg.NET_DestIP); ok {
 		msg.NET_Dest = addr.Host
+	}
+
+	if _, ok := h.excludeComm[msg.Comm]; ok {
+		return nil, nil
 	}
 
 	jsonMsg, err := json.Marshal(msg)

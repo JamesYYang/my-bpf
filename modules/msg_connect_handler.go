@@ -5,13 +5,15 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"log"
+	"my-bpf/config"
 	"my-bpf/k8s"
 
 	"github.com/cilium/ebpf"
 )
 
 type Connect_Msg_Handler struct {
-	name string
+	name        string
+	excludeComm map[string]bool
 }
 
 func init() {
@@ -28,6 +30,10 @@ func (h *Connect_Msg_Handler) Name() string {
 	return h.name
 }
 
+func (h *Connect_Msg_Handler) SetupMsgFilter(c *config.Configuration) {
+	h.excludeComm = ParseExcludeComm(c)
+}
+
 func (h *Connect_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 	var event Net_Tcp_Event
 	if err := binary.Read(bytes.NewBuffer(b), binary.LittleEndian, &event); err != nil {
@@ -41,6 +47,10 @@ func (h *Connect_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 		msg.FillEventBase(event.Net_Event_Base)
 		msg.Event = NET_Connect
 	} else {
+		return nil, nil
+	}
+
+	if _, ok := h.excludeComm[msg.Comm]; ok {
 		return nil, nil
 	}
 

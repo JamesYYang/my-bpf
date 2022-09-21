@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"my-bpf/config"
 	"my-bpf/k8s"
 
 	"github.com/cilium/ebpf"
@@ -21,6 +22,9 @@ func init() {
 
 func (h *Tc_Msg_Handler) Name() string {
 	return h.name
+}
+
+func (h *Tc_Msg_Handler) SetupMsgFilter(c *config.Configuration) {
 }
 
 func (h *Tc_Msg_Handler) SetupKernelMap(m *ebpf.Map, w *k8s.Watcher) error {
