@@ -6,8 +6,9 @@ import (
 
 type IpAddressCtroller struct {
 	sync.RWMutex
-	w   *Watcher
-	Ips map[string]*NetAddress
+	w       *Watcher
+	LocalIP string
+	Ips     map[string]*NetAddress
 }
 
 type NetAddress struct {
@@ -43,6 +44,9 @@ func (ipc *IpAddressCtroller) AddEndpoint(addr []NetAddress) {
 }
 
 func (ipc *IpAddressCtroller) GetEndpointByIP(ip string) (*NetAddress, bool) {
+	if ip == ipc.LocalIP {
+		return nil, false
+	}
 	ipc.RLock()
 	defer ipc.RUnlock()
 	i, ok := ipc.Ips[ip]

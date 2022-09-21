@@ -27,6 +27,9 @@ func main() {
 	log.Println("mbpf start...")
 	log.Printf("process pid: %d\n", os.Getpid())
 
+	localIP, localIF := modules.GetLocalIP()
+	log.Printf("local ip: %s on %s\n", localIP, localIF)
+
 	wd, err := modules.NewWorkerDispatch()
 	if err != nil {
 		log.Printf("Start dispatch error: %v", err)
@@ -35,7 +38,7 @@ func main() {
 		wd.Run()
 
 		k8sReady := make(chan bool)
-		wd.K8SWatcher = k8s.NewWatcher(wd.BPFConfig, func() {
+		wd.K8SWatcher = k8s.NewWatcher(wd.BPFConfig, localIP, func() {
 			once.Do(func() { k8sReady <- true })
 		})
 		go wd.K8SWatcher.Run()
