@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"my-bpf/k8s"
+	"my-bpf/kernel"
 	"my-bpf/modules"
 	"os"
 	"os/signal"
@@ -15,6 +17,18 @@ import (
 var once sync.Once
 
 func main() {
+
+	// 环境检测
+	// 系统内核版本检测
+	kv, err := kernel.HostVersion()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if kv < kernel.VersionCode(4, 15, 0) {
+		log.Fatalf("Linux Kernel version %v is not supported. Need > 4.15 .", kv)
+	} else {
+		log.Printf("linux kernel version %v check ok!", kv)
+	}
 
 	// Allow the current process to lock memory for eBPF resources.
 	if err := rlimit.RemoveMemlock(); err != nil {
@@ -29,6 +43,10 @@ func main() {
 
 	localIP, localIF := modules.GetLocalIP()
 	log.Printf("local ip: %s on %s\n", localIP, localIF)
+
+	uname, _ := modules.GetOSUnamer()
+	unameBytes, _ := json.MarshalIndent(uname, "", "\t")
+	log.Println(string(unameBytes))
 
 	wd, err := modules.NewWorkerDispatch()
 	if err != nil {
