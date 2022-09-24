@@ -1,10 +1,10 @@
 FROM golang:1.18-alpine
 
-LABEL maintainer="james.y.yang@newegg.com"
-
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
-RUN apk add --no-cache --virtual .build-deps make clang llvm bash dumb-init tzdata
+RUN apk update \
+  && apk upgrade --no-cache \
+  && apk add --no-cache tzdata make clang llvm bash dumb-init
 
 WORKDIR /dist
 
@@ -17,6 +17,8 @@ COPY ./ebpf /dist/ebpf
 COPY ./modules /dist/modules
 
 COPY ./k8s /dist/k8s
+
+COPY ./kernel /dist/kernel
 
 COPY ./go.mod /dist/
 

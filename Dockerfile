@@ -18,6 +18,8 @@ COPY ./modules /dist/modules
 
 COPY ./k8s /dist/k8s
 
+COPY ./kernel /dist/kernel
+
 COPY ./go.mod /dist/
 
 COPY ./go.sum /dist/

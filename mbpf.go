@@ -52,6 +52,7 @@ func main() {
 	if err != nil {
 		log.Printf("Start dispatch error: %v", err)
 	} else {
+		wd.HostUname = uname
 		wd.InitWorkers()
 		wd.Run()
 

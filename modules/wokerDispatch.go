@@ -1,12 +1,15 @@
 package modules
 
 import (
+	"fmt"
 	"log"
 	"my-bpf/config"
 	"my-bpf/k8s"
+	"os"
 )
 
 type WokerDispatch struct {
+	HostUname    *UnameInfo
 	Wokers       []*Woker
 	BPFConfig    *config.Configuration
 	K8SWatcher   *k8s.Watcher
@@ -26,17 +29,29 @@ func NewWorkerDispatch() (*WokerDispatch, error) {
 }
 
 func (wd *WokerDispatch) InitWorkers() {
+	btf := wd.MatchExtBtf()
 	for n, c := range wd.BPFConfig.WokerConfig {
 		if c.Enable {
 			w := &Woker{}
 			w.name = n
 			w.wd = wd
 			w.config = c
-			w.extBTF = wd.BPFConfig.ExtBTF
+			w.extBTF = btf
 			w.msgHandler = msgHandlers[c.MsgHandler]
 			w.msgHandler.SetupMsgFilter(wd.BPFConfig)
 			wd.Wokers = append(wd.Wokers, w)
 		}
+	}
+}
+
+func (wd *WokerDispatch) MatchExtBtf() string {
+	extBtf := wd.BPFConfig.ExtBTF
+	kr := wd.HostUname.Release
+	btfname := fmt.Sprintf("ebpf/ext-btf/%s.btf", kr)
+	if _, err := os.Stat(btfname); err != nil {
+		return extBtf
+	} else {
+		return btfname
 	}
 }
 
