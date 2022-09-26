@@ -27,7 +27,7 @@ type Watcher struct {
 	onFinish      func()
 }
 
-func NewWatcher(c *config.Configuration, localIP string, onChange func()) *Watcher {
+func NewWatcher(c *config.Configuration, onChange func()) *Watcher {
 	var config = &rest.Config{}
 	var err error
 
@@ -36,7 +36,7 @@ func NewWatcher(c *config.Configuration, localIP string, onChange func()) *Watch
 	}
 	w.EndpointCtrl = &EndpointCtroller{w: w, Endpoints: make(map[string]*EndpointInfo)}
 	w.ServiceCtrl = &ServiceCtroller{w: w, Services: make(map[string]*ServiceInfo)}
-	w.IpCtrl = &IpAddressCtroller{w: w, LocalIP: localIP, Ips: make(map[string]*NetAddress)}
+	w.IpCtrl = &IpAddressCtroller{w: w, K8SNodeCIDR: c.K8SNodeCIDR, Ips: make(map[string]*NetAddress)}
 
 	if c.EnableK8S {
 		if c.IsInK8S {

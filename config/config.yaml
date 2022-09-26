@@ -1,6 +1,7 @@
 ExtBTF: 
 EnableK8S: false
 IsInK8S: false
+K8SNodeCIDR: 172.16.178.0/24
 IsMockService: false
 NotifyServiceChange: false
 EventOutput: Console

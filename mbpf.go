@@ -57,7 +57,7 @@ func main() {
 		wd.Run()
 
 		k8sReady := make(chan bool)
-		wd.K8SWatcher = k8s.NewWatcher(wd.BPFConfig, localIP, func() {
+		wd.K8SWatcher = k8s.NewWatcher(wd.BPFConfig, func() {
 			once.Do(func() { k8sReady <- true })
 		})
 		go wd.K8SWatcher.Run()
