@@ -36,7 +36,7 @@ docker run -d \
   --net=host \
   --privileged \
   -v /sys/kernel/debug:/sys/kernel/debug \
-  jamesyyang/mbpf:0.0.6
+  jamesyyang/mbpf:0.2.0
 ```
 
 ## Reference
