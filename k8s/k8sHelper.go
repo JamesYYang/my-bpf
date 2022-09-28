@@ -25,9 +25,6 @@ func (ipc *IpAddressCtroller) RemoveEndpoint(addr []NetAddress) {
 	ipc.Lock()
 	defer ipc.Unlock()
 	for _, a := range addr {
-		if a.Type == "Service" && ipc.w.ServiceRemove != nil {
-			ipc.w.ServiceRemove <- a
-		}
 		delete(ipc.Ips, a.IP)
 	}
 }
@@ -41,9 +38,6 @@ func (ipc *IpAddressCtroller) AddEndpoint(addr []NetAddress) {
 	}
 
 	for _, a := range addr {
-		if a.Type == "Service" && ipc.w.ServiceAdd != nil {
-			ipc.w.ServiceAdd <- a
-		}
 
 		if ipc.ipNet != nil && ipc.isK8SNode(a.IP) {
 			return

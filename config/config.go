@@ -28,18 +28,16 @@ type (
 	}
 
 	Configuration struct {
-		ExtBTF              string                         `yaml:"ExtBTF"`
-		EnableK8S           bool                           `yaml:"EnableK8S"`
-		IsInK8S             bool                           `yaml:"IsInK8S"`
-		K8SNodeCIDR         string                         `yaml:"K8SNodeCIDR"`
-		IsMockService       bool                           `yaml:"IsMockService"`
-		NotifyServiceChange bool                           `yaml:"NotifyServiceChange"`
-		EventOutput         string                         `yaml:"EventOutput"`
-		KafkaAddr           string                         `yaml:"KafkaAddr"`
-		KafkaBatchSize      int                            `yaml:"KafkaBatchSize"`
-		KafkaTopic          string                         `yaml:"KafkaTopic"`
-		ExcludeComm         []string                       `yaml:"ExcludeComm"`
-		WokerConfig         map[string]WorkerConfiguration `yaml:"WokerConfig"`
+		ExtBTF         string                         `yaml:"ExtBTF"`
+		EnableK8S      bool                           `yaml:"EnableK8S"`
+		IsInK8S        bool                           `yaml:"IsInK8S"`
+		K8SNodeCIDR    string                         `yaml:"K8SNodeCIDR"`
+		EventOutput    string                         `yaml:"EventOutput"`
+		KafkaAddr      string                         `yaml:"KafkaAddr"`
+		KafkaBatchSize int                            `yaml:"KafkaBatchSize"`
+		KafkaTopic     string                         `yaml:"KafkaTopic"`
+		ExcludeComm    []string                       `yaml:"ExcludeComm"`
+		WokerConfig    map[string]WorkerConfiguration `yaml:"WokerConfig"`
 	}
 )
 

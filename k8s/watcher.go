@@ -16,15 +16,12 @@ import (
 )
 
 type Watcher struct {
-	client        kubernetes.Interface
-	EndpointCtrl  *EndpointCtroller
-	ServiceCtrl   *ServiceCtroller
-	IpCtrl        *IpAddressCtroller
-	MockCtrl      *MockCtroller
-	ServiceAdd    chan NetAddress
-	ServiceRemove chan NetAddress
-	readyCount    int32
-	onFinish      func()
+	client       kubernetes.Interface
+	EndpointCtrl *EndpointCtroller
+	ServiceCtrl  *ServiceCtroller
+	IpCtrl       *IpAddressCtroller
+	readyCount   int32
+	onFinish     func()
 }
 
 func NewWatcher(c *config.Configuration, onChange func()) *Watcher {
@@ -56,15 +53,6 @@ func NewWatcher(c *config.Configuration, onChange func()) *Watcher {
 			panic(err.Error())
 		}
 		w.client = client
-	} else {
-		if c.IsMockService {
-			w.MockCtrl = &MockCtroller{w: w}
-		}
-	}
-
-	if c.NotifyServiceChange {
-		w.ServiceAdd = make(chan NetAddress, 10)
-		w.ServiceRemove = make(chan NetAddress, 10)
 	}
 
 	return w
@@ -73,9 +61,6 @@ func NewWatcher(c *config.Configuration, onChange func()) *Watcher {
 func (w *Watcher) Run() {
 
 	if w.client == nil {
-		if w.MockCtrl != nil {
-			w.MockCtrl.StartMock()
-		}
 		w.onFinish()
 		return
 	}

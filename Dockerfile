@@ -1,10 +1,10 @@
-FROM ubuntu:jammy
+FROM golang:1.18-alpine
 
-RUN apt-get update 
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
-RUN apt-get install -y ca-certificates
-
-RUN apt-get install -y golang-go make clang llvm dumb-init
+RUN apk update \
+  && apk upgrade --no-cache \
+  && apk add --no-cache tzdata make clang llvm bash dumb-init
 
 WORKDIR /dist
 

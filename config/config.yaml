@@ -2,8 +2,6 @@ ExtBTF:
 EnableK8S: false
 IsInK8S: false
 K8SNodeCIDR: 172.16.178.0/24
-IsMockService: false
-NotifyServiceChange: false
 EventOutput: Console
 KafkaAddr: 172.16.171.78:9092,172.16.171.79:9092,172.16.171.80:9092
 KafkaTopic: mbpf_event
@@ -72,20 +70,6 @@ WokerConfig:
         AttachToFuncName: tcp_v4_send_reset
     MapName: tcp_reset_events
     MsgHandler: mh_tcp_reset
-  EBPTCDNSProbe: 
-    PerfMapSize: 1
-    Asset: ebpf/bin/tc_dns.o
-    Enable: false
-    EbpfType: TC
-    Probes:
-      - UID: MBPFXDPProbe
-        Section: classifier/egress
-        EbpfFuncName: tc_dns_func
-        Ifname:
-        NetworkDirection: Egress
-    MapToKernel: dns_a_records
-    MapName: dns_capture_events
-    MsgHandler: mh_tc_dns
   EBPFTCProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tc_capture.o
