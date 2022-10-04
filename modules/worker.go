@@ -38,6 +38,7 @@ func (w *Woker) setupTraceManager() {
 			Section:          p.Section,
 			EbpfFuncName:     p.EbpfFuncName,
 			AttachToFuncName: p.AttachToFuncName,
+			BinaryPath:       p.BinaryPath,
 		}
 		w.bpfManager.Probes = append(w.bpfManager.Probes, probe)
 	}

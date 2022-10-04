@@ -25,6 +25,7 @@ type (
 		AttachToFuncName string `yaml:"AttachToFuncName"`
 		Ifname           string `yaml:"Ifname"`
 		NetworkDirection string `yaml:"NetworkDirection"`
+		BinaryPath       string `yaml:"BinaryPath"`
 	}
 
 	Configuration struct {

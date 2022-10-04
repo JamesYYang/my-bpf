@@ -37,7 +37,7 @@ WokerConfig:
   EBPFTCPConnectProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_connect.o
-    Enable: true
+    Enable: false
     EbpfType: Trace
     Probes:
       - UID: MBPFTCPConnectProbe
@@ -49,7 +49,7 @@ WokerConfig:
   EBPFTCPRetransProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_retrans.o
-    Enable: true
+    Enable: false
     EbpfType: Kprobe
     Probes:
       - UID: MBPFTCPRetransProbe
@@ -61,7 +61,7 @@ WokerConfig:
   EBPFTCPRSTProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_reset.o
-    Enable: true
+    Enable: false
     EbpfType: Kprobe
     Probes:
       - UID: MBPFTCPRSTProbe
@@ -88,4 +88,22 @@ WokerConfig:
         NetworkDirection: Egress
     MapName: tc_capture_events
     MsgHandler: mh_tc_capture
+  EBPFDNSProbe: 
+    PerfMapSize: 1
+    Asset: ebpf/bin/udp_dns.o
+    Enable: true
+    EbpfType: Uprobe
+    Probes:
+      - UID: MBPFUDPDNSEntry
+        Section: uprobe/getaddrinfo
+        EbpfFuncName: getaddrinfo_entry
+        AttachToFuncName: getaddrinfo
+        BinaryPath: /lib/x86_64-linux-gnu/libc.so.6
+      - UID: MBPFUDPDNSReturn
+        Section: uretprobe/getaddrinfo
+        EbpfFuncName: getaddrinfo_return
+        AttachToFuncName: getaddrinfo
+        BinaryPath: /lib/x86_64-linux-gnu/libc.so.6
+    MapName: udp_dns_events
+    MsgHandler: mh_udp_dns
     

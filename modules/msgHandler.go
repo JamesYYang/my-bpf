@@ -43,6 +43,14 @@ func NewNetMessage() *BPFNetMessage {
 	return msg
 }
 
+func NewDNSMessage() *BPFDNSParseMessage {
+	msg := &BPFDNSParseMessage{}
+	msg.TS = GetTimestamp()
+	msg.Host_Name, _ = os.Hostname()
+	msg.Host_IP, _ = GetLocalIP()
+	return msg
+}
+
 func (msg *BPFSysMessage) FillEventBase(eb Probe_Event_Base) {
 	msg.Pid = int(eb.Pid)
 	msg.Tgid = int(eb.Tgid)

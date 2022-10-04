@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
-	"log"
 	"my-bpf/config"
 	"my-bpf/k8s"
 
@@ -45,9 +44,5 @@ func (h *Execve_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 	msg.Filename += " " + string(bytes.ReplaceAll(event.Args[:event.BuffSize], []byte{0}, []byte{' '}))
 	// msg.Filename += " " + unix.ByteSliceToString(event.Args[:])
 	jsonMsg, err := json.MarshalIndent(msg, "", "\t")
-	if err != nil {
-		log.Printf("log mesaage failed: %s", err.Error())
-	}
-
-	return jsonMsg, nil
+	return jsonMsg, err
 }

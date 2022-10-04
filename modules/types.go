@@ -75,11 +75,12 @@ type Net_Packet_Event struct {
 	IsIngress bool
 }
 
-type Net_DNS_Event struct {
-	TS         uint64
-	RecordType uint16
-	IsMatch    uint8
-	Name       [256]byte
+type Udp_DNS_Event struct {
+	Pid    uint32
+	Starts uint64
+	Ends   uint64
+	Comm   [16]byte
+	Host   [256]byte
 }
 
 const (
@@ -96,6 +97,7 @@ const (
 const (
 	EBPF_Trace  = "TracePoint"
 	EBPF_Kprobe = "Kprobe"
+	EBPF_Uprobe = "Uprobe"
 	EBPF_TC     = "TC"
 	EBPF_XDP    = "XDP"
 )
@@ -130,4 +132,14 @@ type BPFNetMessage struct {
 	NET_DestSvc    string `json:"NET_DestSvc"`
 	NET_DestNS     string `json:"NET_DestNS"`
 	NET_DestPort   int    `json:"NET_DestPort"`
+}
+
+type BPFDNSParseMessage struct {
+	TS        int64  `json:"TS"`
+	Host_Name string `json:"Host_Name"`
+	Host_IP   string `json:"Host_IP"`
+	Pid       int    `json:"Pid"`
+	Comm      string `json:"Comm"`
+	Host      string `json:"Host"`
+	Spend     uint64 `json:"Spend"`
 }

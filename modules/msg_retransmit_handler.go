@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
-	"log"
 	"my-bpf/config"
 	"my-bpf/k8s"
 
@@ -63,11 +62,7 @@ func (h *TcpRetrans_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error
 	}
 
 	jsonMsg, err := json.Marshal(msg)
-	if err != nil {
-		log.Printf("log mesaage failed: %s", err.Error())
-	}
-
-	return jsonMsg, nil
+	return jsonMsg, err
 
 	// strMsg := fmt.Sprintf("[%s] [(%s) %s:%d] -> [(%s) %s:%d]", msg.Event,
 	// 	msg.NET_Source, msg.NET_SourceIP, msg.NET_SourcePort,
