@@ -90,6 +90,7 @@ const (
 	NET_Rest    = "TCP_RESET"
 	NET_Accept  = "TCP_ACCEPT"
 	NET_Connect = "TCP_CONNECT"
+	NET_Close   = "TCP_CLOSE"
 	TC_Package  = "TC_Package"
 	NET_DNS     = "UDP_DNS"
 )
@@ -132,6 +133,7 @@ type BPFNetMessage struct {
 	NET_DestSvc    string `json:"NET_DestSvc"`
 	NET_DestNS     string `json:"NET_DestNS"`
 	NET_DestPort   int    `json:"NET_DestPort"`
+	NET_Life       int    `json:"NET_Life"`
 }
 
 type BPFDNSParseMessage struct {

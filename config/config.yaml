@@ -37,7 +37,7 @@ WokerConfig:
   EBPFTCPConnectProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_connect.o
-    Enable: false
+    Enable: true
     EbpfType: Trace
     Probes:
       - UID: MBPFTCPConnectProbe
@@ -49,7 +49,7 @@ WokerConfig:
   EBPFTCPRetransProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_retrans.o
-    Enable: false
+    Enable: true
     EbpfType: Kprobe
     Probes:
       - UID: MBPFTCPRetransProbe
@@ -91,7 +91,7 @@ WokerConfig:
   EBPFDNSProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/udp_dns.o
-    Enable: true
+    Enable: false
     EbpfType: Uprobe
     Probes:
       - UID: MBPFUDPDNSEntry

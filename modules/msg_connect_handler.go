@@ -4,20 +4,25 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"my-bpf/config"
 	"my-bpf/k8s"
+	"sync"
 
 	"github.com/cilium/ebpf"
 )
 
 type Connect_Msg_Handler struct {
+	sync.Mutex
 	name        string
 	excludeComm map[string]bool
+	connCache   map[string]int64
 }
 
 func init() {
 	h := &Connect_Msg_Handler{}
 	h.name = "mh_tcp_connect"
+	h.connCache = make(map[string]int64)
 	RegisterMsgHandler(h)
 }
 
@@ -42,9 +47,12 @@ func (h *Connect_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 	if event.Oldstate == TCP_SYN_RECV && event.Newstate == TCP_ESTABLISHED {
 		msg.FillEventBase(event.Net_Event_Base)
 		msg.Event = NET_Accept
-	} else if event.Oldstate == TCP_CLOSE && event.Newstate == TCP_SYN_SENT {
+	} else if event.Oldstate == TCP_SYN_SENT && event.Newstate == TCP_ESTABLISHED {
 		msg.FillEventBase(event.Net_Event_Base)
 		msg.Event = NET_Connect
+	} else if event.Newstate == TCP_CLOSE {
+		msg.FillEventBase(event.Net_Event_Base)
+		msg.Event = NET_Close
 	} else {
 		return nil, nil
 	}
@@ -67,6 +75,18 @@ func (h *Connect_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 		msg.NET_DestSvc = addr.Svc
 		msg.NET_DestNS = addr.NS
 	}
+
+	connKey := fmt.Sprintf("%s:%d->%s:%d", msg.NET_SourceIP, msg.NET_SourcePort, msg.NET_DestIP, msg.NET_DestPort)
+	h.Lock()
+	if msg.Event == NET_Close {
+		if birth, ok := h.connCache[connKey]; ok {
+			msg.NET_Life = int(msg.TS - birth)
+			delete(h.connCache, connKey)
+		}
+	} else {
+		h.connCache[connKey] = msg.TS
+	}
+	h.Unlock()
 
 	jsonMsg, err := json.Marshal(msg)
 	return jsonMsg, err
