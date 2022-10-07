@@ -65,6 +65,12 @@ type Net_Socket_Event struct {
 	Dport uint16
 }
 
+type Net_Udp_Event struct {
+	Net_Event_Base
+	Dip   uint32
+	Dport uint16
+}
+
 type Net_Packet_Event struct {
 	Len       uint32
 	Ifindex   uint32
@@ -84,15 +90,16 @@ type Udp_DNS_Event struct {
 }
 
 const (
-	SYS_Execve  = "SYS_Execve"
-	SYS_Openat  = "SYS_Openat"
-	NET_Retrans = "TCP_RETANSMIT"
-	NET_Rest    = "TCP_RESET"
-	NET_Accept  = "TCP_ACCEPT"
-	NET_Connect = "TCP_CONNECT"
-	NET_Close   = "TCP_CLOSE"
-	TC_Package  = "TC_Package"
-	NET_DNS     = "UDP_DNS"
+	SYS_Execve   = "SYS_Execve"
+	SYS_Openat   = "SYS_Openat"
+	NET_Retrans  = "TCP_RETANSMIT"
+	NET_Rest     = "TCP_RESET"
+	NET_Accept   = "TCP_ACCEPT"
+	NET_Connect  = "TCP_CONNECT"
+	NET_Close    = "TCP_CLOSE"
+	TC_Package   = "TC_Package"
+	NET_DNS      = "UDP_DNS"
+	NET_UDP_CONN = "UDP_CONNECT"
 )
 
 const (
@@ -133,7 +140,7 @@ type BPFNetMessage struct {
 	NET_DestSvc    string `json:"NET_DestSvc"`
 	NET_DestNS     string `json:"NET_DestNS"`
 	NET_DestPort   int    `json:"NET_DestPort"`
-	NET_Life       int    `json:"NET_Life"`
+	NET_Life       int64  `json:"NET_Life"`
 }
 
 type BPFDNSParseMessage struct {

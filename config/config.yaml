@@ -61,7 +61,7 @@ WokerConfig:
   EBPFTCPRSTProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_reset.o
-    Enable: false
+    Enable: true
     EbpfType: Kprobe
     Probes:
       - UID: MBPFTCPRSTProbe
@@ -70,6 +70,18 @@ WokerConfig:
         AttachToFuncName: tcp_v4_send_reset
     MapName: tcp_reset_events
     MsgHandler: mh_tcp_reset
+  EBPFUDConnProbe: 
+    PerfMapSize: 1
+    Asset: ebpf/bin/udp_connect.o
+    Enable: true
+    EbpfType: Kprobe
+    Probes:
+      - UID: MBPFUDPCONNProbe
+        Section: kprobe/ip4_datagram_connect
+        EbpfFuncName: kp_udp_connect
+        AttachToFuncName: ip4_datagram_connect
+    MapName: udp_connect_events
+    MsgHandler: mh_udp_connect
   EBPFTCProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tc_capture.o

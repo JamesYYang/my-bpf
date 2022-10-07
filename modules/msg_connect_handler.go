@@ -80,7 +80,7 @@ func (h *Connect_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 	h.Lock()
 	if msg.Event == NET_Close {
 		if birth, ok := h.connCache[connKey]; ok {
-			msg.NET_Life = int(msg.TS - birth)
+			msg.NET_Life = msg.TS - birth
 			delete(h.connCache, connKey)
 		}
 	} else {

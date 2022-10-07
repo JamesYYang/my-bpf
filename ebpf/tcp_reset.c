@@ -28,13 +28,6 @@ static inline unsigned char *skb_network_header(const struct sk_buff *skb)
   return READ_KERN(skb->head) + READ_KERN(skb->network_header);
 }
 
-static inline char *get_task_uts_name(struct task_struct *task)
-{
-	struct nsproxy *np = READ_KERN(task->nsproxy);
-	struct uts_namespace *uts_ns = READ_KERN(np->uts_ns);
-	return READ_KERN(uts_ns->name.nodename);
-}
-
 SEC("kprobe/tcp_v4_send_reset")
 int kp_tcp_v4_send_reset(struct pt_regs *ctx)
 {
