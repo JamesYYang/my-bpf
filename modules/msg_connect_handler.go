@@ -76,23 +76,29 @@ func (h *Connect_Msg_Handler) Decode(b []byte, w *k8s.Watcher) ([]byte, error) {
 		msg.NET_DestNS = addr.NS
 	}
 
+	if !h.handlerConnCache(msg) {
+		return nil, nil
+	}
+
+	jsonMsg, err := json.Marshal(msg)
+	return jsonMsg, err
+}
+
+func (h *Connect_Msg_Handler) handlerConnCache(msg *BPFNetMessage) bool {
 	connKey := fmt.Sprintf("%s:%d->%s:%d", msg.NET_SourceIP, msg.NET_SourcePort, msg.NET_DestIP, msg.NET_DestPort)
+	ret := true
 	h.Lock()
 	if msg.Event == NET_Close {
 		if birth, ok := h.connCache[connKey]; ok {
 			msg.NET_Life = msg.TS - birth
 			delete(h.connCache, connKey)
+		} else {
+			ret = false
 		}
 	} else {
 		h.connCache[connKey] = msg.TS
 	}
 	h.Unlock()
 
-	jsonMsg, err := json.Marshal(msg)
-	return jsonMsg, err
-
-	// strMsg := fmt.Sprintf("[%s] [(%s) %s:%d] -> [(%s) %s:%d]", msg.Event,
-	// 	msg.NET_Source, msg.NET_SourceIP, msg.NET_SourcePort,
-	// 	msg.NET_Dest, msg.NET_DestIP, msg.NET_DestPort)
-	// return []byte(strMsg), nil
+	return ret
 }
