@@ -73,7 +73,7 @@ WokerConfig:
   EBPFUDConnProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/udp_connect.o
-    Enable: true
+    Enable: false
     EbpfType: Kprobe
     Probes:
       - UID: MBPFUDPCONNProbe
