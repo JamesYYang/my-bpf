@@ -4,6 +4,7 @@ build-ebpf:
 	mkdir -p ebpf/bin
 	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ./ebpf/bin/sys_execve.o ./ebpf/sys_execve.c
 	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ./ebpf/bin/sys_openat.o ./ebpf/sys_openat.c
+	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ./ebpf/bin/sys_capable.o ./ebpf/sys_capable.c
 	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ./ebpf/bin/tcp_connect.o ./ebpf/tcp_connect.c
 	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ./ebpf/bin/tcp_reset.o ./ebpf/tcp_reset.c
 	clang -g -O2 -c -I./ebpf/headers -target bpf -D__TARGET_ARCH_x86 -o ./ebpf/bin/tcp_retrans.o ./ebpf/tcp_retrans.c

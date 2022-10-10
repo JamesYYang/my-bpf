@@ -32,6 +32,7 @@
 #define TC_ACT_REDIRECT 7
 
 #define ETH_P_IP 0x0800 /* Internet Protocol packet        */
+#define CAP_OPT_NOAUDIT 0b10
 
 struct task_base_info
 {

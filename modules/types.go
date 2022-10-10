@@ -20,6 +20,14 @@ type Sys_Execve_Event struct {
 	Args     [10240]byte
 }
 
+type Sys_Capable_Event struct {
+	Pid   uint32
+	Uid   uint32
+	Comm  [16]byte
+	Cap   uint8
+	Audit uint8
+}
+
 const (
 	TCP_ESTABLISHED  = 1
 	TCP_SYN_SENT     = 2
@@ -151,4 +159,16 @@ type BPFDNSParseMessage struct {
 	Comm      string `json:"Comm"`
 	Host      string `json:"Host"`
 	Spend     uint64 `json:"Spend"`
+}
+
+type BPFCapableMessage struct {
+	TS        int64  `json:"TS"`
+	Host_Name string `json:"Host_Name"`
+	Host_IP   string `json:"Host_IP"`
+	Pid       int    `json:"Pid"`
+	Uid       int    `json:"Uid"`
+	Comm      string `json:"Comm"`
+	Cap       int    `json:"Cap"`
+	CapName   string `json:"CapName"`
+	Audit     int    `json:"Audit"`
 }

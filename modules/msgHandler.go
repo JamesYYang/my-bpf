@@ -35,6 +35,14 @@ func NewSysMessage() *BPFSysMessage {
 	return msg
 }
 
+func NewCapableMessage() *BPFCapableMessage {
+	msg := &BPFCapableMessage{}
+	msg.TS = GetTimestamp()
+	msg.Host_Name, _ = os.Hostname()
+	msg.Host_IP, _ = GetLocalIP()
+	return msg
+}
+
 func NewNetMessage() *BPFNetMessage {
 	msg := &BPFNetMessage{}
 	msg.TS = GetTimestamp()

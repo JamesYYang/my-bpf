@@ -34,6 +34,18 @@ WokerConfig:
         AttachToFuncName: sys_enter_openat
     MapName: sys_enter_openat_events
     MsgHandler: mh_sys_enter_openat
+  EBPFSysCapable: 
+    PerfMapSize: 1
+    Asset: ebpf/bin/sys_capable.o
+    Enable: true
+    EbpfType: Kprobe
+    Probes:
+      - UID: MBPFSysCapableProbe
+        Section: kprobe/cap_capable
+        EbpfFuncName: kp_sys_capable
+        AttachToFuncName: cap_capable
+    MapName: sys_capable_events
+    MsgHandler: mh_sys_capable
   EBPFTCPConnectProbe: 
     PerfMapSize: 1
     Asset: ebpf/bin/tcp_connect.o
