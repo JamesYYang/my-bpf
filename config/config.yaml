@@ -1,9 +1,9 @@
 ExtBTF: 
 EnableK8S: false
 IsInK8S: false
-K8SNodeCIDR: 172.16.178.0/24
+K8SNodeCIDR: 172.17.178.0/24
 EventOutput: Console
-KafkaAddr: 172.16.171.78:9092,172.16.171.79:9092,172.16.171.80:9092
+KafkaAddr: 172.17.17.78:9092,172.17.17.79:9092,172.17.17.80:9092
 KafkaTopic: mbpf_event
 KafkaBatchSize: 10
 ExcludeComm:
